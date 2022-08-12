@@ -1,0 +1,62 @@
+---
+
+############################################################################
+# An Ansible playbook to automate a Fail2ban installation on Ubuntu 20.04. #
+# The playbook will install and configure Fail2ban onto managed nodes.     #
+############################################################################
+
+# Defining target section.
+- name: Installing Fail2ban
+  hosts: managed_nodes
+  gather_facts: yes
+
+# Defining variable section.
+  vars:
+    bantime: 3600
+    port: 22
+    time: 300
+    retry: 3
+    email: levon@locstat.co.za
+
+# Defining task section.
+  tasks:
+      - name: Upgrading system
+        apt:
+          upgrade: yes
+          update_cache: yes
+
+      - name: Installing packages
+        apt:
+          name:  "{{ item }}"
+          state: present
+          update_cache: yes
+        with_items:
+         - fail2ban
+         - sendmail
+        when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '20.04'
+
+      - name: Applying configuration
+        template:
+          src: "templates/jail.local.j2"
+          dest: "/etc/fail2ban/jail.local"
+          owner: root
+          group: root
+          mode: u=rw,g=r,o=r
+
+        notify:
+        - restart service
+
+      - name: Confirming status
+        command: "fail2ban-client status sshd"
+
+      - name: Printing end status
+        debug:
+          msg: 'Finished, Fail2ban installed.'
+
+# Defining handler section.
+  handlers:
+      - name: restart service
+        systemd:
+          name: fail2ban
+          state: restarted
+...
