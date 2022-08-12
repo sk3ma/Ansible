@@ -21,7 +21,7 @@ Vagrant.configure("2") do |config|
     c.vm.provision "shell", inline: <<-SHELL
     echo -e "\e[36;1;3;5mSystem online...\e[m"
     SHELL
-      end
+    end
   # Customizing Ubuntu server.
     config.vm.define "node1" do |x|
     x.vm.box = "bento/ubuntu-20.04"
@@ -35,7 +35,7 @@ Vagrant.configure("2") do |config|
     x.vm.provision "shell", inline: <<-SHELL
     echo -e "\e[36;1;3;5mSystem online...\e[m"
     SHELL
-      end
+    end
   # Customizing Ubuntu server.
     config.vm.define "node2" do |y|
     y.vm.box = "bento/ubuntu-20.04"
@@ -49,5 +49,5 @@ Vagrant.configure("2") do |config|
     y.vm.provision "shell", inline: <<-SHELL
     echo -e "\e[36;1;3;5mSystem online...\e[m"
     SHELL
-      end
+    end
 end
