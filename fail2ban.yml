@@ -16,7 +16,7 @@
     port: 22
     time: 300
     retry: 3
-    email: levon@locstat.co.za
+    email: sk3ma87@gmail.com
 
 # Defining task section.
   tasks:
