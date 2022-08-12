@@ -8,7 +8,6 @@
 # Defining target section.
 - name: Installing Fail2ban
   hosts: managed_nodes
-  become: true
   gather_facts: yes
 
 # Defining variable section.
@@ -33,7 +32,11 @@
         with_items:
          - fail2ban
          - sendmail
+         - screenfetch
         when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '20.04'
+
+      - name: Updating shell
+        command: "/usr/bin/screenfetch >> ~/.bashrc"
 
       - name: Applying configuration
         template:
