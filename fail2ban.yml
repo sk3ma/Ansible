@@ -8,6 +8,7 @@
 # Defining target section.
 - name: Installing Fail2ban
   hosts: managed_nodes
+  become: true
   gather_facts: yes
 
 # Defining variable section.
