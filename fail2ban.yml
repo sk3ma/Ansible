@@ -8,6 +8,7 @@
 # Defining target section.
 - name: Installing Fail2ban
   hosts: managed_nodes
+  become: true
   gather_facts: yes
 
 # Defining variable section.
@@ -20,14 +21,14 @@
 
 # Defining task section.
   tasks:
-      - name: Upgrading system
+      - name: Upgrading Ubuntu system
         apt:
           upgrade: yes
           update_cache: yes
 
       - name: Installing packages
         apt:
-          name:  "{{ item }}"
+          name: "{{ item }}"
           state: present
         with_items:
          - fail2ban
@@ -35,10 +36,13 @@
          - screenfetch
         when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '20.04'
 
-      - name: Updating shell
-        command: "/usr/bin/screenfetch >> ~/.bashrc"
+      - name: Removing execute permissions
+        command: "chmod -x /etc/update-motd.d/*"
 
-      - name: Applying configuration
+      - name: Updating Bash shell
+        command: "/usr/bin/screenfetch >> /home/vagrant/.bashrc"
+
+      - name: Applying Fail2ban configuration
         template:
           src: "templates/jail.local.j2"
           dest: "/etc/fail2ban/jail.local"
@@ -49,7 +53,7 @@
         notify:
         - restart service
 
-      - name: Confirming status
+      - name: Confirming SSH status
         command: "fail2ban-client status sshd"
 
       - name: Printing end status
