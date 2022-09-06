@@ -103,6 +103,7 @@
 
       - name: Removing permissions
         command: "chmod -x /etc/update-motd.d/*"
+        become: yes
 
       - name: Updating shell
         shell: "echo '/usr/bin/screenfetch' | tee /home/vagrant/.bashrc"
