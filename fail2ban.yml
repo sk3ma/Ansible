@@ -30,8 +30,8 @@
           name: aide
           state: present
 
-#      - name: Initializing AIDE
-#        command: "aideinit"
+      - name: Initializing AIDE
+        command: "aideinit"
 
       - name: Making backup
         copy: 
@@ -118,9 +118,19 @@
           group: root
           mode: u=rw,g=r,o=r
 
-#      - name: Changing hostname
-#        hostname:
-#          name: "aws_haproxy"
+      - name: Changing hostname
+        hostname:
+          name: "aws_haproxy"
+
+      - name: Updating shell
+        lineinfile:
+          create: yes
+          mode: u=rw
+          dest: ~/.bashrc
+          owner: vagrant
+          regexp: '^PS1='
+          line: 'PS1=""${debian_chroot:+($debian_chroot)}\[\033[01;31m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ "'
+          state: present
 
         notify:
         - restart service
