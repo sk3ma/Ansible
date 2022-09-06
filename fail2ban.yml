@@ -8,6 +8,7 @@
 - name: Hardening systems
   hosts: managed_nodes
   gather_facts: yes
+  become: yes
 
 # Defining variable section.
   vars:
@@ -29,8 +30,8 @@
           name: aide
           state: present
 
-      - name: Initializing AIDE
-        command: "aideinit"
+#      - name: Initializing AIDE
+#        command: "aideinit"
 
       - name: Making backup
         copy: 
@@ -102,8 +103,9 @@
         when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '20.04'
 
       - name: Removing permissions
-        command: "chmod -x /etc/update-motd.d/*"
-        become: yes
+        file:
+          dest: /etc/update-motd.d
+          mode: a-x
 
       - name: Updating shell
         shell: "echo '/usr/bin/screenfetch' | tee /home/vagrant/.bashrc"
@@ -115,6 +117,10 @@
           owner: root
           group: root
           mode: u=rw,g=r,o=r
+
+#      - name: Changing hostname
+#        hostname:
+#          name: "aws_haproxy"
 
         notify:
         - restart service
