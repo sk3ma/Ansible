@@ -1,0 +1,17 @@
+[default]
+bantime = {{ bantime }}
+ignoreip  = 127.0.0.1
+mta = sendmail
+sender = {{ email }}
+destemail = {{ email }}
+sendername = Fail2ban
+action = %(action_mwl)s
+findtime  = {{ time }}
+
+[sshd]
+enabled = true
+port = {{ port }}
+logpath = /var/log/auth.log
+banaction = iptables-multiport
+filter = sshd
+maxretry = {{ retry }}
