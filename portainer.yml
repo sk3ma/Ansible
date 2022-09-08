@@ -5,7 +5,7 @@
 #############################################################################
 
 # Defining target section.
-- name: Hardening systems
+- name: Installing Portainer
   hosts: managed_nodes
   gather_facts: yes
 
