@@ -5,7 +5,7 @@
 #############################################################################
 
 # Defining target section.
-- name: Installing Portainer
+- name: Portainer installation
   hosts: managed_nodes
   gather_facts: yes
 
