@@ -16,7 +16,7 @@
     port: 22
     time: 300
     retry: 3
-    email: levon@locstat.co.za
+    email: sk3ma87@gmail.com
 
 # Defining task section.
   tasks:
@@ -71,7 +71,7 @@
         lineinfile:
           path: /etc/default/aide
           regexp: 'MAILTO=root'
-          line: "MAILTO=levon@locstat.co.za"
+          line: "MAILTO=sk3ma87@gmail.com"
 
       - name: Importing key
         apt_key:
@@ -120,7 +120,7 @@
 
 #      - name: Changing hostname
 #        hostname:
-#          name: "vertex15"
+#          name: "websrv01"
 
       - name: Updating shell
         lineinfile:
