@@ -1,5 +1,3 @@
-# https://www.locstat.co.za/CI/logo/png/locstat-logo.png
-
 #!/usr/bin/env bash
 
 # Declaring variables.
