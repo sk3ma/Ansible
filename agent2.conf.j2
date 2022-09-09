@@ -1,0 +1,15 @@
+AllowKey=system.run[*]
+PidFile=/var/run/zabbix/zabbix_agent2.pid
+LogFile=/var/run/zabbix/zabbix_agent2.log
+LogFileSize=0
+DebugLevel=3
+ListenPort={{ agent_port }}
+Server={{ zabbix_server }}
+ServerActive={{ zabbix_server }}
+Hostname={{ ansible_hostname }}
+HostMetadata={{ agent_data }}
+RefreshActiveChecks=120
+Timeout=30
+ControlSocket=/tmp/agent.sock
+Include=/etc/zabbix/zabbix_agent2.d/*.conf
+Include=/zabbix_agent2.d/plugins.d/*.conf
