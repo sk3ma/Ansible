@@ -84,14 +84,14 @@
         lineinfile:
           path: /etc/zabbix/zabbix_agent2.conf
           regexp: 'Hostname=ip-172-31-47-98'
-          line: "Hostname=Ubuntu_node1"
+          line: "Hostname=websrv01"
         when: ansible_hostname == 'ip-172-31-47-98'
 
       - name: Updating node hostname
         lineinfile:
           path: /etc/zabbix/zabbix_agent2.conf
           regexp: 'Hostname=ip-172-31-65-21'
-          line: "Hostname=Ubuntu_node2"
+          line: "Hostname=dbsrv02"
         when: ansible_hostname == 'ip-172-31-65-21'
 
       - name: Removing package
