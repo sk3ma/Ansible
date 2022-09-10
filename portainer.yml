@@ -24,7 +24,7 @@
         command: bash /opt/Container.sh
         run_once: false
 
-      - name: Deploying Portainer
+      - name: Deploying server
         docker_container:
           name: portainer
           image: portainer/portainer-ce:2.14.2
