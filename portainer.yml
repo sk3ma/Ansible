@@ -9,9 +9,6 @@
   hosts: managed_nodes
   gather_facts: yes
 
-# Defining variable section.
-  vars:
-
 # Defining task section.
   tasks:
       - name: Copying script
