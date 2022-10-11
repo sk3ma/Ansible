@@ -20,10 +20,10 @@ Vagrant.configure("2") do |config|
     # Preparing Ubuntu installation.
     c.vm.provision "shell", inline: <<-SHELL
       cat << STOP > /etc/hosts
-127.0.0.1		      localhost
-127.0.1.1		      controller
-192.168.56.72    	node1
-192.168.56.73    	node2
+127.0.0.1   localhost
+127.0.1.1   controller
+192.168.56.72   node1
+192.168.56.73   node2
 STOP
       echo -e "\e[36;1;3;5mSystem online...\e[m"
     SHELL
