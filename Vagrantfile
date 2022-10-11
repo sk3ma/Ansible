@@ -60,10 +60,10 @@ STOP
     # Preparing Ubuntu installation.
     y.vm.provision "shell", inline: <<-SHELL
       cat << STOP > /etc/hosts
-127.0.0.1		      localhost
-127.0.1.1	    	  node2
-192.168.56.70    	controller
-192.168.56.72    	node1
+127.0.0.1       localhost
+127.0.1.1       node2
+192.168.56.70   controller
+192.168.56.72   node1
 STOP
       echo -e "\e[36;1;3;5mSystem online...\e[m"
     SHELL
