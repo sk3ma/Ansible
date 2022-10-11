@@ -42,8 +42,8 @@ STOP
       cat << STOP > /etc/hosts
 127.0.0.1       localhost
 127.0.1.1       node1
-192.168.56.70       controller
-192.168.56.73       node2
+192.168.56.70   controller
+192.168.56.73   node2
 STOP
       echo -e "\e[36;1;3;5mSystem online...\e[m"
     SHELL
