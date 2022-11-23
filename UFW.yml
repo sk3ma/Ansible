@@ -1,0 +1,51 @@
+---
+
+##################################################################
+# An Ansible playbook to configure UFW firewall on Ubuntu 20.04. #
+##################################################################
+
+# Defining target section.
+- name: Configuring UFW
+  hosts: all
+  become: true
+  gather_facts: yes
+
+# Defining task section.
+  tasks:
+  - name: Deny incoming
+    ufw:
+      direction: incoming
+      proto: any
+      policy: deny
+    notify:
+    - reload ufw
+
+  - name: Allow outgoing
+    ufw:
+      direction: outgoing
+      proto: any
+      policy: allow
+    notify:
+    - reload ufw
+
+  - name: Allow SSH
+    ufw:
+      rule: allow
+      name: OpenSSH
+    notify:
+    - reload ufw
+
+  - name: Enable service
+    ufw:
+      state: enabled
+
+      - name: Printing end status
+        debug:
+          msg: 'Finished, firewall configured.'
+
+# Defining handler section.
+  handlers:
+  - name: reload ufw
+    ufw:
+      state: reloaded
+...
