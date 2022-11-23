@@ -39,9 +39,9 @@
     ufw:
       state: enabled
 
-      - name: Printing end status
-        debug:
-          msg: 'Finished, firewall configured.'
+  - name: Printing end status
+    debug:
+      msg: 'Finished, firewall configured.'
 
 # Defining handler section.
   handlers:
