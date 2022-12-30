@@ -118,9 +118,9 @@
           group: root
           mode: u=rw,g=r,o=r
 
-#      - name: Changing hostname
-#        hostname:
-#          name: "websrv01"
+      - name: Changing hostname
+        hostname:
+          name: "websrv01"
 
       - name: Updating shell
         lineinfile:
