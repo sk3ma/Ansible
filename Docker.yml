@@ -6,11 +6,11 @@
 
 # Defining target section.
 - name: Install Docker and deploy Nginx
-  host: localhost
+  hosts: localhost
   become: true
   gather_facts: yes
 
-# Defining task section.
+  # Defining task section.
   tasks:
     - name: Installing packages
       apt:
@@ -18,7 +18,7 @@
           - apt-transport-https
           - ca-certificates
           - software-properties-common
-	  - curl
+          - curl
           - gnupg
         state: latest
         update_cache: true
@@ -42,25 +42,26 @@
       apt:
         name: docker-ce
         state: latest
-	  ignore_errors: yes
+        ignore_errors: yes
 
     - name: Creating directory
       file:
         path: "/container"
         state: directory
-        mode: u=rwx,g=rw,o=rw
+        mode: 'u=rwx,g=rw,o=rw'
 
-      - name: Deploying container
-        docker_container:
-          image: nginx:latest
-          name: nginx
-          state: started
-          ports:
-            - "8080:80"
-          volumes:
-            - /container
-		  
-      - name: End message
-        debug:
-          msg: 'Finished, application installed.'
+    - name: Deploying container
+      docker_container:
+        image: nginx:latest
+        name: nginx
+        state: started
+        ports:
+          - "8080:80"
+        volumes:
+          - "/container:/container"
+
+    - name: End message
+      debug:
+        msg: 'Finished, application installed.'
+
 ...
