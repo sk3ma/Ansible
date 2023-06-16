@@ -1,46 +1,54 @@
 ---
 
-##########################################################################
-# An Ansible playbook to automate a Docker installation on Ubuntu 20.04. #
-##########################################################################
+##########################################################
+# An Ansible playbook to install Docker on Ubuntu 20.04. #
+##########################################################
 
 # Defining target section.
-- name: Installing Docker
-  hosts: all
+- name: Install Docker, deploy MySQL and Wordpress
+  host: localhost
   become: true
   gather_facts: yes
 
-# Defining target section.
+# Defining task section.
   tasks:
-      - name: Installing packages
-        apt:
-          name:
+    - name: Installing packages
+      apt:
+        name:
           - apt-transport-https
           - ca-certificates
-          - lsb-release
-          - gnupg
-          state: latest
+          - software-properties-common
+		  - curl
+		  - gnupg
+        state: latest
         update_cache: true
 
-      - name: Creating directories
-        file: 
-          path: "{{ item }}"
-          state: directory
-          mode: u=rwx,g=rw,o=rw
-        with_items:
-        - /container
-        - /srv/scripts
+    - name: Adding key
+      apt_key:
+        url: "https://download.docker.com/linux/ubuntu/gpg"
+        state: present
 
-      - name: Adding GPG key
-        apt_key:
-          url: "https://download.docker.com/linux/{{ ansible_distribution | lower }}/gpg"
-          state: present
+    - name: Adding repository
+      apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
+        state: present
+        filename: docker
 
-      - name: Installing Docker
-        apt_repository:
-          repo: "deb [arch={{ ansible_architecture }}] https://download.docker.com/linux/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} stable"
-          state: present
-          filename: docker
+    - name: Updating system
+      apt:
+        update_cache: yes
+
+    - name: Installing Docker
+      apt:
+        name: docker-ce
+        state: latest
+	  ignore_errors: yes
+
+    - name: Creating directory
+      file:
+        path: "/container"
+        state: directory
+        mode: u=rwx,g=rw,o=rw
 
       - name: Deploying container
         docker_container:
@@ -51,8 +59,8 @@
             - "8080:80"
           volumes:
             - /container
-
-      - name: Printing end status
+		  
+      - name: End message
         debug:
-          msg: 'Finished, Application installed.'
+          msg: 'Finished, operation complete.'
 ...
