@@ -5,7 +5,7 @@
 ##########################################################
 
 # Defining target section.
-- name: Install Docker, deploy MySQL and Wordpress
+- name: Install Docker and deploy Nginx
   host: localhost
   become: true
   gather_facts: yes
@@ -18,8 +18,8 @@
           - apt-transport-https
           - ca-certificates
           - software-properties-common
-		  - curl
-		  - gnupg
+	  - curl
+          - gnupg
         state: latest
         update_cache: true
 
@@ -62,5 +62,5 @@
 		  
       - name: End message
         debug:
-          msg: 'Finished, operation complete.'
+          msg: 'Finished, application installed.'
 ...
