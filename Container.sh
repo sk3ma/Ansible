@@ -4,6 +4,22 @@
 DISTRO=$(lsb_release -ds)
 VERSION=$(lsb_release -cs)
 
+# Welcome message.
+cat << END
+--------------------------
+# Welcome to the script. #
+--------------------------
+                    ##        .            
+              ## ## ##       ==            
+           ## ## ## ##      ===            
+       /""""""""""""""""\___/ ===        
+  ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~
+       \______ o          __/            
+         \    \        __/             
+          \____\______/                    
+
+END
+
 # Docker installation.
 install() {
     echo -e "\e[96;1;3mDistribution: ${DISTRO}\e[m"
