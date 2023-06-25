@@ -6,9 +6,10 @@ VERSION=$(lsb_release -cs)
 
 # Welcome message.
 cat << STOP
---------------------------
+#------------------------#
 # Welcome to the script. #
---------------------------
+#------------------------#
+
                     ##        .            
               ## ## ##       ==            
            ## ## ## ##      ===            
@@ -17,6 +18,7 @@ cat << STOP
        \______ o          __/            
          \    \        __/             
           \____\______/                    
+
 STOP
 
 # Docker installation.
