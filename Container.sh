@@ -5,7 +5,7 @@ DISTRO=$(lsb_release -ds)
 VERSION=$(lsb_release -cs)
 
 # Welcome message.
-cat << END
+cat << STOP
 --------------------------
 # Welcome to the script. #
 --------------------------
@@ -18,7 +18,7 @@ cat << END
          \    \        __/             
           \____\______/                    
 
-END
+STOP
 
 # Docker installation.
 install() {
