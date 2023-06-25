@@ -17,7 +17,6 @@ cat << STOP
        \______ o          __/            
          \    \        __/             
           \____\______/                    
-
 STOP
 
 # Docker installation.
