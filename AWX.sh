@@ -53,7 +53,7 @@ awx() {
     unzip 17.1.0.zip
     cd awx-17.1.0/installer
     sudo rm -f inventory
-    sudo tee inventory << STOP
+    sudo tee inventory << STOP > /dev/null
 [localhost]
 admin_user=admin
 admin_password=819ce053
