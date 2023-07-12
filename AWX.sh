@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+#############################################################################
+# The purpose of the script is to automate an AWX installation on Ubuntu.   #
+# The script installs Docker and Ansible then executes an Ansible playbook. #
+#############################################################################
+
 # Declaring variable.
 DISTRO=$(lsb_release -ds)
 
@@ -8,7 +13,6 @@ cat << STOP
 #--------------------#
 # Welcome to Ubuntu. #
 #--------------------#
-
                     ##        .            
               ## ## ##       ==            
            ## ## ## ##      ===            
@@ -17,7 +21,6 @@ cat << STOP
        \______ o          __/            
          \    \        __/             
           \____\______/                    
-
 STOP
 
 # Package installation.
@@ -54,7 +57,7 @@ awx() {
     sudo tee inventory << STOP
 [localhost]
 admin_user=admin
-admin_password=password
+admin_password=819ce053
 secret_key=${secret}
 STOP
     echo -e "\e[32;1;3mExecuting playbook\e[m"
