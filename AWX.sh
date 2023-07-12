@@ -68,8 +68,9 @@ pg_password=awxpass
 pg_database=awx
 pg_port=5432
 admin_user=admin
-admin_password=password
+admin_password=1q2w3e4r5t
 secret_key=${secret}
+create_preload_data=True
 STOP
     echo -e "\e[32;1;3mExecuting playbook\e[m"
     ansible-playbook -i inventory install.yml
