@@ -28,9 +28,8 @@ system() {
     echo -e "\e[96;1;3mDistribution: ${DISTRO}\e[m"
     sudo apt update
     echo -e "\e[32;1;3mInstalling packages\e[m"
-    sudo apt install nodejs npm -y
+    sudo apt install nodejs npm python3-pip git -y
     sudo npm install npm --global
-    sudo apt install python3-pip git -y
 }
 
 # Docker installation.
