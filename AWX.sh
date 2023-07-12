@@ -73,7 +73,7 @@ secret_key=${secret}
 create_preload_data=True
 STOP
     echo -e "\e[32;1;3mExecuting playbook\e[m"
-    ansible-playbook -i inventory install.yml
+    sudo ansible-playbook -i inventory install.yml
     echo -e "\e[33;1;3;5mFinished, installation complete.\e[m"
     exit
 }
