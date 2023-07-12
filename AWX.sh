@@ -54,9 +54,21 @@ awx() {
     cd awx-17.1.0/installer
     sudo rm -f inventory
     sudo tee inventory << STOP > /dev/null
-[localhost]
+localhost ansible_connection=local ansible_python_interpreter="/usr/bin/env python3"
+[all:vars]
+dockerhub_base=ansible
+awx_task_hostname=awx
+awx_web_hostname=awxweb
+postgres_data_dir="~/.awx/pgdocker"
+host_port=80
+host_port_ssl=443
+docker_compose_dir="~/.awx/awxcompose"
+pg_username=awx
+pg_password=awxpass
+pg_database=awx
+pg_port=5432
 admin_user=admin
-admin_password=819ce053
+admin_password=password
 secret_key=${secret}
 STOP
     echo -e "\e[32;1;3mExecuting playbook\e[m"
