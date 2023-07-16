@@ -74,7 +74,7 @@ create_preload_data=True
 STOP
     echo -e "\e[32;1;3m[ INFO ] Executing playbook\e[m"
     sudo ansible-playbook -i inventory install.yml
-    echo -e "\e[33;1;3;5mFinished, installation complete.\e[m"
+    echo -e "\e[33;1;3;5m[ INFO ] Finished, installation complete.\e[m"
     exit
 }
 
