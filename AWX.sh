@@ -25,7 +25,7 @@ STOP
 
 # Package installation.
 system() {
-    echo -e "\e[96;1;3m[INFO] Distribution: ${DISTRO}\e[m"
+    echo -e "\e[96;1;3m[OK] Distribution: ${DISTRO}\e[m"
     sudo apt update
     echo -e "\e[32;1;3m[INFO] Installing packages\e[m"
     sudo apt install nodejs npm python3-pip git -y
@@ -74,13 +74,13 @@ create_preload_data=True
 STOP
     echo -e "\e[32;1;3m[INFO] Executing playbook\e[m"
     sudo ansible-playbook -i inventory install.yml
-    echo -e "\e[33;1;3;5m[INFO] Finished, installation complete.\e[m"
+    echo -e "\e[33;1;3;5m[NOTICE] Finished, installation complete.\e[m"
     exit
 }
 
 # Calling functions.
 if [[ -f /etc/lsb-release ]]; then
-    echo -e "\e[35;1;3;5m[INFO] Ubuntu detected, proceeding...\e[m"
+    echo -e "\e[35;1;3;5m[OK] Ubuntu detected, proceeding...\e[m"
     system
     install
     awx
