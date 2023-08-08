@@ -1,2 +1,2 @@
-# Ansible
+# Ansible playbooks
 Random Ansible projects.
