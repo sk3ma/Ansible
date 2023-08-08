@@ -1,0 +1,71 @@
+---
+
+#########################################################
+# An Ansible playbook to install Nginx on Ubuntu 20.04. #
+#########################################################
+
+# Defining target section.
+- name: Installing Nginx
+  hosts: localhost
+  become: true
+  gather_facts: yes
+
+ # Defining task section.
+  tasks:
+    - name: Installing dependencies
+      apt:
+        name: "{{ item }}"
+        state: latest
+      with_items:
+        - gnupg2
+        - ca-certificates
+
+    - name: Installing Nginx
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
+      ignore_errors: no
+
+    - name: Get version
+      command: nginx -v
+      register: results
+
+    - debug:
+        msg: "{{ results.stderr }}"
+
+    - name: Allowing service
+      systemd:
+        name: nginx
+        state: started
+        enabled: yes
+
+      notify:
+      - restart proxy
+
+    - name: Allowing HTTP
+      ufw:
+        rule: allow
+        port: 80
+        proto: tcp
+
+    - name: Allowing HTTPS
+      ufw:
+        rule: allow
+        port: 443
+        proto: tcp
+
+    - name: End message
+      debug:
+        msg: 'Finished, Nginx installed.'
+
+
+# Defining handler section.
+  handlers:
+    - name: restart nginx
+       systemd:
+        name: nginx
+        state: restarted
+
+    - meta: end_play
+...
