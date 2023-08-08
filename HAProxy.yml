@@ -1,0 +1,75 @@
+---
+
+#################################################################################
+# This Ansible playbook will automate an HAProxy installation on Ubuntu 20.04.  #
+# It adds the repository, fetches the GPG key and installs the HAProxy package. #
+#################################################################################
+
+# Defining target section.
+- name: HAProxy installation
+  hosts: localhost
+  gather_facts: yes 
+  become: true
+
+# Defining task section.
+  tasks:
+    - name: Installing dependencies
+      apt:
+        name: "{{ item }}"
+        state: latest
+      with_items:
+        - gnupg2
+        - ca-certificates
+        - software-properties-common
+
+    - name: Adding repsitory
+      lineinfile:
+        path: /etc/apt/sources.list.d/haproxy.list
+        create: yes
+        line: "deb http://ppa.launchpad.net/vbernat/haproxy-2.6/ubuntu focal main"
+
+    - name: Obtaining key
+      apt_key:
+        url: https://haproxy.debian.net/bernat.debian.org.gpg
+        state: present
+      register: value
+
+    - name: Display key
+      debug:
+          msg: "The {{ value.fp }} fingerprint was added"
+
+    - name: Installing HAProxy
+      apt:
+        name: haproxy
+        state: latest
+        update_cache: yes
+
+    - name: HAProxy version
+      command: "haproxy -v"
+      register: results
+
+    - debug:
+        msg: "{{ results.stdout }}"
+
+    - name: Enabling service
+      systemd:
+        name: haproxy
+        state: started
+        enabled: yes
+
+        notify:
+        - restart proxy
+
+      - name: End status
+        debug:
+          msg: 'Finished, HAProxy installed.'
+
+# Defining handler section.
+  handlers:
+      - name: restart proxy
+        systemd:
+          name: haproxy
+          state: restarted
+
+    - meta: end_play 
+...
