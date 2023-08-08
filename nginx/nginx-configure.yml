@@ -33,4 +33,3 @@
         msg: 'Finished, Nginx configured.'
 
     - meta: end_play
-...
