@@ -26,7 +26,7 @@ Vagrant.configure("2") do |config|
 192.168.56.72   node1
 192.168.56.73   node2
 STOP
-      echo -e "\e[36;1;3;5mSystem online...\e[m"
+      echo -e "\e[36;1;3;5m[INFO] System online\e[m"
     SHELL
     end
   # Customizing Ubuntu server.
@@ -47,7 +47,7 @@ STOP
 192.168.56.70   controller
 192.168.56.73   node2
 STOP
-      echo -e "\e[36;1;3;5mSystem online...\e[m"
+      echo -e "\e[36;1;3;5m[INFO] System online\e[m"
     SHELL
     end
   # Customizing Ubuntu server.
@@ -68,7 +68,7 @@ STOP
 192.168.56.70   controller
 192.168.56.72   node1
 STOP
-      echo -e "\e[36;1;3;5mSystem online...\e[m"
+      echo -e "\e[36;1;3;5m[INFO] System online\e[m"
     SHELL
     end
 end
