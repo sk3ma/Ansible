@@ -15,6 +15,7 @@ Vagrant.configure("2") do |config|
     c.ssh.forward_agent = true
     c.vm.hostname = "controller"
     # Defining the network.
+#    c.vm.network "private_network", type: "dhcp"
     c.vm.network "private_network", ip: "192.168.56.70"
     c.vm.network "forwarded_port", guest: 80, host: 8080, auto_correct: true
     # Preparing Ubuntu installation.
@@ -35,6 +36,7 @@ STOP
     x.ssh.forward_agent = true
     x.vm.hostname = "node1"
     # Defining the network.
+#    x.vm.network "private_network", type: "dhcp"
     x.vm.network "private_network", ip: "192.168.56.72"
     x.vm.network "forwarded_port", guest: 80, host: 8081, auto_correct: true
     # Preparing Ubuntu installation.
@@ -55,6 +57,7 @@ STOP
     y.ssh.forward_agent = true
     y.vm.hostname = "node2"
     # Defining the network.
+#    y.vm.network "private_network", type: "dhcp"
     y.vm.network "private_network", ip: "192.168.56.73"
     y.vm.network "forwarded_port", guest: 80, host: 8082, auto_correct: true
     # Preparing Ubuntu installation.
