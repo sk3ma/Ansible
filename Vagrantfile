@@ -5,15 +5,15 @@ Vagrant.configure("2") do |config|
   # Configuring hardware resources.
   config.vm.provider "virtualbox" do |v|
     v.memory = 4096
-    v.cpus = 2
-    v.gui = false
+    v.cpus   = 2
+    v.gui    = false
   end
   # Customizing Ubuntu server.
     config.vm.define "controller" do |c|
-    c.vm.box = "bento/ubuntu-20.04"
+    c.vm.box              = "bento/ubuntu-20.04"
     c.vm.box_check_update = false
-    c.ssh.forward_agent = true
-    c.vm.hostname = "controller"
+    c.ssh.forward_agent   = true
+    c.vm.hostname         = "controller"
     # Defining the network.
 #    c.vm.network "private_network", type: "dhcp"
     c.vm.network "private_network", ip: "192.168.56.70"
@@ -31,10 +31,10 @@ STOP
     end
   # Customizing Ubuntu server.
     config.vm.define "node1" do |x|
-    x.vm.box = "bento/ubuntu-20.04"
+    x.vm.box              = "bento/ubuntu-20.04"
     x.vm.box_check_update = false
-    x.ssh.forward_agent = true
-    x.vm.hostname = "node1"
+    x.ssh.forward_agent   = true
+    x.vm.hostname         = "node1"
     # Defining the network.
 #    x.vm.network "private_network", type: "dhcp"
     x.vm.network "private_network", ip: "192.168.56.72"
@@ -52,10 +52,10 @@ STOP
     end
   # Customizing Ubuntu server.
     config.vm.define "node2" do |y|
-    y.vm.box = "bento/ubuntu-20.04"
+    y.vm.box              = "bento/ubuntu-20.04"
     y.vm.box_check_update = false
-    y.ssh.forward_agent = true
-    y.vm.hostname = "node2"
+    y.ssh.forward_agent   = true
+    y.vm.hostname         = "node2"
     # Defining the network.
 #    y.vm.network "private_network", type: "dhcp"
     y.vm.network "private_network", ip: "192.168.56.73"
