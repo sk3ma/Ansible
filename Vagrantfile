@@ -7,6 +7,7 @@ Vagrant.configure("2") do |config|
     v.memory = 4096
     v.cpus   = 2
     v.gui    = false
+    v.name   = "Ubuntu-20.04"
   end
   # Customizing Ubuntu server.
     config.vm.define "controller" do |c|
