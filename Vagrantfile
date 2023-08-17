@@ -26,6 +26,7 @@ Vagrant.configure("2") do |config|
       sudo apt install software-properties-common tree -y
       sudo apt-add-repository ppa:ansible/ansible -y
       sudo apt install ansible -y
+      echo -e "\e[32;1;3m[INFO] Configuring Ansible\e[m"
       cat << STOP > /etc/hosts
 127.0.0.1       localhost
 127.0.1.1       controller
