@@ -21,11 +21,23 @@ Vagrant.configure("2") do |config|
     c.vm.network "forwarded_port", guest: 80, host: 8080, auto_correct: true
     # Preparing Ubuntu installation.
     c.vm.provision "shell", inline: <<-SHELL
+      echo -e "\e[32;1;3m[INFO] Installing Ansible\e[m"
+      sudo apt update
+      sudo apt install software-properties-common tree -y
+      sudo apt-add-repository ppa:ansible/ansible -y
+      sudo apt install ansible -y
       cat << STOP > /etc/hosts
 127.0.0.1       localhost
 127.0.1.1       controller
 192.168.56.72   node1
 192.168.56.73   node2
+STOP
+      tee /opt/ansible/inventory << STOP > /dev/null
+localhost ansible_connection=local
+STOP
+      tee /top/ansible/ansible.cfg << STOP > /dev/null
+[defaults]
+inventory = /opt/ansible/inventory
 STOP
       echo -e "\e[36;1;3;5m[INFO] System online\e[m"
     SHELL
