@@ -1,0 +1,7 @@
+---
+- name: Tasks for rw_mongodb role
+  include_tasks: "{{ item }}"
+  loop:
+    - install.yml
+    - configure.yml
+...
