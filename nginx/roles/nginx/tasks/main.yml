@@ -1,5 +1,5 @@
 ---
-- name: Tasks for rw_mongodb role
+- name: Tasks for nginx role
   include_tasks: "{{ item }}"
   loop:
     - install.yml
