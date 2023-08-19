@@ -6,7 +6,7 @@
 
 # Defining target section.
 - name: Apply role
-  hosts: localhost
+  hosts: localhost # target_hosts
   become: yes
   gather_facts: yes
 
