@@ -30,7 +30,8 @@ Vagrant.configure("2") do |config|
       echo -e "192.168.56.70    controller" >> /etc/hosts
       echo -e "192.168.56.72    node1" >> /etc/hosts
       echo -e "192.168.56.73    node2" >> /etc/hosts
-      mkdir -vp /srv/ansible/{tasks,handlers,defaults,vars,templates}
+      mkdir -p /srv/ansible/{tasks,handlers,defaults,vars,templates}
+      touch /srv/ansible/main.yml
       tee /srv/ansible/inventory << STOP > /dev/null
 localhost ansible_connection=local
 node1 ansible_ssh_host=192.168.56.72 ansible_ssh_pass=ansible ansible_user=ansible
