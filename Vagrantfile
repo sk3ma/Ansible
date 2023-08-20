@@ -35,7 +35,7 @@ localhost ansible_connection=local
 node1 ansible_ssh_host=192.168.56.72 ansible_ssh_pass=ansible ansible_user=ansible
 node2 ansible_ssh_host=192.168.56.73 ansible_ssh_pass=ansible ansible_user=ansible
 STOP
-      tee /top/ansible/ansible.cfg << STOP > /dev/null
+      tee /opt/ansible/ansible.cfg << STOP > /dev/null
 [defaults]
 inventory = /opt/ansible/inventory
 
