@@ -38,6 +38,12 @@ STOP
       tee /top/ansible/ansible.cfg << STOP > /dev/null
 [defaults]
 inventory = /opt/ansible/inventory
+
+[privilege_escalation]
+become = True
+become_method = sudo
+become_user = root
+become_ask_pass = False
 STOP
       echo -e "\e[36;1;3;5m[INFO] System online\e[m"
     SHELL
