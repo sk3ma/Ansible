@@ -1,0 +1,123 @@
+---
+
+#########################################################################
+# An Ansible playbook to automate a Redis installation on Ubuntu 20.04. #
+#########################################################################
+
+# Defining target section.
+- name: Install Redis on Ubuntu
+  hosts: localhost
+  become: true
+
+# Defining variable section.
+  vars:
+    ip: "{{ ansible_facts.default_ipv4.address }}"
+    server_type: ""
+
+# Defining task section.
+  tasks:
+    - name: Debug IP
+      ansible.builtin.debug:
+        msg: "ip = {{ ip }}"
+
+    - name: Define type
+      ansible.builtin.set_fact:
+        server_type: "master"
+      when: ip == master
+
+    - name: Setting slave
+      ansible.builtin.set_fact:
+        server_type: "slave"
+      when: ip in slave
+
+    - name: Print type
+      ansible.builtin.debug:
+        msg: 'server type = {{ server_type }}'
+
+    - name: Installing dependencies
+      ansible.builtin.apt:
+        name: "{{ item }}"
+        state: latest
+      loop:
+        - gnupg2
+        - ca-certificates
+        - lsb-release
+
+    - name: Adding repository
+      ansible.builtin.lineinfile:
+        path: /etc/apt/sources.list.d/redis.list
+        create: yes
+        line: "deb https://packages.redis.io/deb focal main"
+
+    - name: Obtain key
+      ansible.builtin.apt_key:
+        url: https://packages.redis.io/gpg
+        state: present
+      register: keyvalue
+
+    - name: Print fingerprint
+      ansible.builtin.debug:
+        msg: "The fingerprint {{ keyvalue.fp }} was added"
+
+    - name: Install Redis
+      ansible.builtin.apt:
+        name: redis
+        state: latest
+        update_cache: yes
+
+    - name: Configure master
+      block:
+        - name: Update Redis configuration
+          ansible.builtin.lineinfile:
+            path: '/etc/redis/redis.conf'
+            regexp: '{{ item.from }}'
+            line: '{{ item.to }}'
+            state: present
+          loop:
+            - { 'from': '^tcp-keepalive', 'to': 'tcp-keepalive 60' }
+            - { 'from': '^bind', 'to': 'bind 127.0.0.1 {{ ip }}' }
+            - { 'from': '^appendonly ', 'to': 'appendonly yes' }
+            - { 'from': '^# requirepass ', 'to': 'requirepass masterpassword' }
+            - { 'from': '^# maxmemory-policy ', 'to': 'maxmemory-policy noeviction' }
+            - { 'from': '^requirepass ', 'to': 'requirepass masterpassword' }
+            - { 'from': '^maxmemory-policy ', 'to': 'maxmemory-policy noeviction' }
+      when: server_type == 'master'
+
+    - name: Configure slave
+      block:
+        - name: Update configuration
+          ansible.builtin.lineinfile:
+            path: '/etc/redis/redis.conf'
+            regexp: '{{ item.from }}'
+            line: '{{ item.to }}'
+            state: present
+          loop:
+            - { 'from': '^bind', 'to': 'bind 127.0.0.1 {{ ip }}' }
+            - { 'from': '^# requirepass ', 'to': 'requirepass slavepassword' }
+            - { 'from': '^requirepass ', 'to': 'requirepass slavepassword' }
+            - { 'from': '^# masterauth ', 'to': 'masterauth masterpassword' }
+            - { 'from': '^masterauth ', 'to': 'masterauth masterpassword' }
+            - { 'from': '^# slaveof ', 'to': 'slaveof {{ master }} 6379' }
+            - { 'from': '^slaveof ', 'to': 'slaveof {{ master }} 6379' }
+      when: server_type == 'slave'
+
+    - name: Confirm version
+      ansible.builtin.command: "redis-server -v"
+      register: results
+
+    - name: Display version
+      ansible.builtin.debug:
+        msg: "{{ results.stdout }}"
+
+    - name: Enabling service
+      ansible.builtin.systemd:
+        name: redis-server
+        enabled: yes
+        state: restarted
+
+      - name: Printing message
+        ansible.builtin.debug:
+          msg: 'Finished, installation complete.'
+
+    - name: End playbook
+      ansible.builtin.meta: end_play
