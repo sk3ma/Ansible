@@ -1,0 +1,121 @@
+---
+
+############################################################################################
+# This Ansible playbook will automate a Zabbix agent 2 installation on Ubuntu 22.04.       #
+# It will uninstall the old Zabbix agent, as well as install and configure Zabbix agent 2. #
+############################################################################################
+
+# Defining target section.
+- name: Installing Zabbix agent 2
+  hosts: flash_jammy
+  gather_facts: yes
+
+# Defining task section.
+  tasks:
+      - name: Copying uninstall script
+        ansible.builtin.copy: 
+          src: "scripts/uninstall.sh"
+          dest: /opt/agent_uninstall.sh
+          mode: u=rwx,g=w,o=r
+
+      - name: Executing uninstall script
+        ansible.builtin.command: bash /opt/agent_uninstall.sh
+        run_once: false
+
+      - name: Updating software repositories
+        ansible.builtin.apt:
+          upgrade: no
+          update_cache: yes
+        when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '22.04'
+        ignore_errors: no
+
+      - name: Downloading Zabbix package
+        ansible.builtin.get_url:
+          url: https://repo.zabbix.com/zabbix/6.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_6.0-3+{{ version22 }}.deb
+          dest: /opt/zagent2-jammy.deb
+          mode: u=rw,g=w,o=r
+
+      - name: Installing Zabbix package
+        ansible.builtin.apt:
+          deb: /opt/zagent2-jammy.deb
+        ignore_errors: yes
+
+      - name: Removing Zabbix source
+        ansible.builtin.file:
+          path: /etc/apt/sources.list.d/zabbix.list
+          state: absent
+
+      - name: Updating Zabbix source
+        ansible.builtin.copy:
+          dest: "/etc/apt/sources.list.d/zabbix.list"
+          content: |
+            deb [arch=amd64] http://repo.zabbix.com/zabbix/6.0/ubuntu jammy main
+            deb-src [arch=amd64] http://repo.zabbix.com/zabbix/6.0/ubuntu jammy main
+
+      - name: Installing Zabbix agent
+        ansible.builtin.apt:
+          name: zabbix-agent2
+          state: present
+          update_cache: yes
+        ignore_errors: yes
+
+      - name: Stopping Zabbix service
+        ansible.builtin.systemd:
+          name: zabbix-agent2
+          state: stopped
+
+      - name: Purging original configuration
+        ansible.builtin.file:
+          path: /etc/zabbix/zabbix_agent2.conf
+          state: absent
+
+      - name: Applying custom configuration
+        ansible.builtin.template:
+          src: "templates/Agent2_ubuntu22.j2"
+          dest: "/etc/zabbix/zabbix_agent2.conf"
+          mode: u=rw,g=w,o=r
+
+      - name: Updating node hostname
+        ansible.builtin.lineinfile:
+          path: /etc/zabbix/zabbix_agent2.conf
+          regexp: 'Hostname=ip-172-31-28-127'
+          line: "Hostname=Mongo1"
+        when: ansible_hostname == 'ip-172-31-45-169'
+
+      - name: Updating node hostname
+        ansible.builtin.lineinfile:
+          path: /etc/zabbix/zabbix_agent2.conf
+          regexp: 'Hostname=ip-172-31-27-22'
+          line: "Hostname=Mongo2"
+        when: ansible_hostname == 'ip-172-31-98-22'
+
+      - name: Updating node hostname
+        ansible.builtin.lineinfile:
+          path: /etc/zabbix/zabbix_agent2.conf
+          regexp: 'Hostname=ip-172-31-31-22'
+          line: "Hostname=Cassandra"
+        when: ansible_hostname == 'ip-172-31-97-23'
+
+      - name: Removing Zabbix package
+        ansible.builtin.file:
+          path: /opt/zagent2-jammy.deb
+          state: absent
+
+      - name: Allowing Docker monitoring
+        ansible.builtin.command: "chmod a=rw /var/run/docker.sock"
+        ignore_errors: yes
+
+      - name: Starting Zabbix service
+        ansible.builtin.systemd:
+          name: zabbix-agent2
+          state: started
+          enabled: yes
+        notify:
+        - restart agent
+
+      - name: Printing end status
+        ansible.builtin.debug:
+          msg: 'Finished, Zabbix agent 2 installed.'
+
+      - name: End Ansible playbook
+        ansible.builtin.meta: end_play

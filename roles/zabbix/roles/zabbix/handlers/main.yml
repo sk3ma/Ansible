@@ -1,0 +1,8 @@
+---
+# Defining handler section.
+  handlers:
+- name: restart agent
+  systemd:
+    name: zabbix-agent2
+    state: restarted
+...

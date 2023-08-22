@@ -1,0 +1,8 @@
+---
+- name: Tasks for zabbix role
+  include_tasks: "{{ item }}"
+  loop:
+    - Agent2-ubuntu18.yml
+    - Agent2-ubuntu20.yml
+    - Agent2-ubuntu22.yml
+...

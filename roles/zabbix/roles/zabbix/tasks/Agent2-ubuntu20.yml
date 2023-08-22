@@ -1,0 +1,149 @@
+---
+
+############################################################################################
+# This Ansible playbook will automate a Zabbix agent 2 installation on Ubuntu 20.04.       #
+# It will uninstall the old Zabbix agent, as well as install and configure Zabbix agent 2. #
+############################################################################################
+
+# Defining target section.
+- name: Installing Zabbix agent 2
+  hosts: demo_nodes
+  gather_facts: yes
+
+# Defining variable section.
+  vars:
+    version: ubuntu20.04_all
+    zabbix_server: 13.246.69.19
+    agent_data: Linux
+    agent_port: 10050
+
+# Defining task section.
+  tasks:
+      - name: Copying uninstall script
+        ansible.builtin.copy: 
+          src: "scripts/uninstall.sh"
+          dest: /opt/agent_uninstall.sh
+          mode: u=rwx,g=w,o=r
+
+      - name: Executing uninstall script
+        ansible.builtin.command: bash /opt/agent_uninstall.sh
+        run_once: false
+
+      - name: Updating software repositories
+        ansible.builtin.apt:
+          upgrade: no
+          update_cache: yes
+        when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '20.04'
+        ignore_errors: no
+
+      - name: Downloading Zabbix package
+        ansible.builtin.get_url:
+          url: https://repo.zabbix.com/zabbix/6.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_6.0-1+{{ version20 }}.deb
+          dest: /opt/zagent2-focal.deb
+          mode: u=rw,g=w,o=r
+
+      - name: Installing Zabbix package
+        ansible.builtin.apt:
+          deb: /opt/zagent2-focal.deb
+        ignore_errors: yes
+
+      - name: Removing Zabbix source
+        ansible.builtin.file:
+          path: /etc/apt/sources.list.d/zabbix.list
+          state: absent
+
+      - name: Updating Zabbix source
+        ansible.builtin.copy:
+          dest: "/etc/apt/sources.list.d/zabbix.list"
+          content: |
+            deb [arch=amd64] http://repo.zabbix.com/zabbix/6.0/ubuntu focal main
+            deb-src [arch=amd64] http://repo.zabbix.com/zabbix/6.0/ubuntu focal main
+
+      - name: Installing Zabbix agent
+        ansible.builtin.apt:
+          name: zabbix-agent2
+          state: present
+          update_cache: yes
+        ignore_errors: yes
+
+      - name: Stopping Zabbix service
+        ansible.builtin.systemd:
+          name: zabbix-agent2
+          state: stopped
+
+      - name: Purging original configuration
+        ansible.builtin.file:
+          path: /etc/zabbix/zabbix_agent2.conf
+          state: absent
+
+      - name: Applying custom configuration
+        ansible.builtin.template:
+          src: "templates/Agent2_ubuntu20"
+          dest: "/etc/zabbix/zabbix_agent2.conf"
+          mode: u=rw,g=w,o=r
+
+      - name: Updating node hostname
+        ansible.builtin.lineinfile:
+          path: /etc/zabbix/zabbix_agent2.conf
+          regexp: 'Hostname=sur002-truservplus-pta3-022'
+          line: "Hostname=Dev_web22"
+        when: ansible_hostname == 'sur002-truservplus-pta3-022'
+
+      - name: Updating node hostname
+        ansible.builtin.lineinfile:
+          path: /etc/zabbix/zabbix_agent2.conf
+          regexp: 'Hostname=sur002-truservplus-pta3-023'
+          line: "Hostname=Dev_web23"
+        when: ansible_hostname == 'sur002-truservplus-pta3-023'
+
+      - name: Updating node hostname
+        ansible.builtin.lineinfile:
+          path: /etc/zabbix/zabbix_agent2.conf
+          regexp: 'Hostname=sur002-truservplus-pta3-024'
+          line: "Hostname=Dev_web24"
+        when: ansible_hostname == 'sur002-truservplus-pta3-024'
+
+      - name: Updating node hostname
+        ansible.builtin.lineinfile:
+          path: /etc/zabbix/zabbix_agent2.conf
+          regexp: 'Hostname=ip-172-31-28-82'
+          line: "Hostname=Dev_aws"
+        when: ansible_hostname == 'ip-172-31-26-61'
+
+      - name: Removing Zabbix package
+        ansible.builtin.file:
+          path: /opt/zagent2-focal.deb
+          state: absent
+
+      - name: Remove existing port
+        ansible.builtin.ufw:
+          delete: true
+          rule: allow
+          port: 10050
+          src: 13.248.159.162
+
+      - name: Allowing Zabbix port
+        ansible.builtin.ufw:
+          rule: allow
+          proto: tcp
+          from_ip: {{ zabbix_server }}
+          to_port: {{ agent_port }}
+
+      - name: Allowing Docker monitoring
+        ansible.builtin.command: "chmod a=rw /var/run/docker.sock"
+        ignore_errors: yes
+
+      - name: Starting Zabbix service
+        ansible.builtin.systemd:
+          name: zabbix-agent2
+          state: started
+          enabled: yes
+        notify:
+        - restart agent
+
+      - name: Printing end status
+        ansible.builtin.debug:
+          msg: 'Finished, Zabbix agent 2 installed.'
+
+      - name: End Ansible playbook
+        ansible.builtin.meta: end_play

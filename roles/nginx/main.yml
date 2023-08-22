@@ -1,0 +1,16 @@
+---
+
+##################################################################################
+# An Ansible playbook to consolidate monolithic playbooks into a reusable roles. #
+##################################################################################
+
+# Defining target section.
+- name: Applying Nginx role
+  hosts: localhost
+  become: yes
+  gather_facts: yes
+
+# Defining roles section.
+  roles: # Refers to the role directory.
+    - nginx
+...
