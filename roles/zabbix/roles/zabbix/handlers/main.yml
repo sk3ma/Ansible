@@ -1,8 +1,7 @@
 ---
 # Defining handler section.
-  handlers:
 - name: restart agent
-  systemd:
+  ansible.builtin.systemd:
     name: zabbix-agent2
     state: restarted
 ...
