@@ -7,7 +7,7 @@
 
 # Defining target section.
 - name: Installing Zabbix agent 2
-  hosts: live_nodes
+  hosts: managed_nodes
   gather_facts: yes
 
 # Defining task section.
