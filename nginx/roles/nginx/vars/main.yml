@@ -1,5 +1,0 @@
----
-# Defining variable section.
-port: 80
-server: mydomain.com
-...

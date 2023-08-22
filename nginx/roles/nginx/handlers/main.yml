@@ -1,7 +1,0 @@
----
-# Defining handler section.
-- name: restart nginx
-  systemd:
-    name: nginx
-    state: restarted
-...
