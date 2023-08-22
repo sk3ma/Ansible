@@ -14,7 +14,7 @@
 # Defining task section.
   tasks:
     - name: Installing dependencies
-      apt:
+      ansible.builtin.apt:
         name: "{{ item }}"
         state: latest
       with_items:
@@ -23,42 +23,49 @@
         - software-properties-common
 
     - name: Adding repsitory
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: /etc/apt/sources.list.d/haproxy.list
         create: yes
         line: "deb http://ppa.launchpad.net/vbernat/haproxy-2.6/ubuntu focal main"
 
     - name: Obtaining key
-      apt_key:
+      aansible.builtin.apt_key:
         url: https://haproxy.debian.net/bernat.debian.org.gpg
         state: present
       register: value
 
     - name: Display key
-      debug:
+      ansible.builtin.debug:
           msg: "The {{ value.fp }} fingerprint was added"
 
     - name: Installing HAProxy
-      apt:
+      ansible.builtin.apt:
         name: haproxy
         state: latest
         update_cache: yes
 
     - name: HAProxy version
-      command: "haproxy -v"
+      command: "haproxy -vv"
       register: results
 
     - debug:
         msg: "{{ results.stdout }}"
 
     - name: Enabling service
-      systemd:
+      ansible.builtin.systemd:
         name: haproxy
         state: started
         enabled: yes
-
         notify:
         - restart proxy
+
+    - name: Issuing late commands
+      ansible.builtin.command:
+        cmd: |
+          haproxy -f /etc/haproxy.cfg
+          sudo systemctl status haproxy
+        chdir: /tmp
+      changed_when: false
 
       - name: End status
         debug:
@@ -67,9 +74,10 @@
 # Defining handler section.
   handlers:
       - name: restart proxy
-        systemd:
+        ansible.builtin.systemd:
           name: haproxy
           state: restarted
 
-    - meta: end_play 
-...
+      - name: End Ansible playbook
+        ansible.builtin.meta: end_play
+
