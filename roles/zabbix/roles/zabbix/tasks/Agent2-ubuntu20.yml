@@ -7,8 +7,9 @@
 
 # Defining target section.
 - name: Installing Zabbix agent 2
-  hosts: demo_nodes
-  gather_facts: yes
+  hosts: web_cluster
+  gather_facts: true
+  become: true
 
 # Defining variable section.
   vars:
