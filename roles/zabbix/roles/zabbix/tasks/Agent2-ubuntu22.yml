@@ -7,8 +7,9 @@
 
 # Defining target section.
 - name: Installing Zabbix agent 2
-  hosts: flash_jammy
-  gather_facts: yes
+  hosts: target_hosts
+  gather_facts: true
+  become: true
 
 # Defining task section.
   tasks:
