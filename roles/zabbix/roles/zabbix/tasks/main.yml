@@ -1,6 +1,6 @@
 ---
 - name: Tasks for zabbix role
-  include_tasks: "{{ item }}"
+  ansible.builtin.include_tasks: "{{ item }}"
   loop:
     - Agent2-ubuntu18.yml
     - Agent2-ubuntu20.yml
