@@ -5,14 +5,11 @@
 # It will uninstall the old Zabbix agent, as well as install and configure Zabbix agent 2. #
 ############################################################################################
 
-# Defining target section.
-- name: Installing Zabbix agent 2
-  hosts: target_hosts
-  gather_facts: true
-  become: true
-
 # Defining task section.
-  tasks:
+      - name: Installing agent
+        ansible.builtin.debug:
+          msg: '[INFO] INSTALLING AGENT...'
+  
       - name: Copying uninstall script
         ansible.builtin.copy: 
           src: "scripts/uninstall.sh"
@@ -116,7 +113,7 @@
 
       - name: Printing end status
         ansible.builtin.debug:
-          msg: 'Finished, Zabbix agent 2 installed.'
+          msg: '[INFO] Finished, Zabbix agent 2 installed.'
 
       - name: End Ansible playbook
         ansible.builtin.meta: end_play
