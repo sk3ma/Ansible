@@ -7,29 +7,28 @@
 # Defining target section.
 - name: Configuring Nginx
   hosts: localhost
+  gather_facts: true
   become: true
-  gather_facts: yes
-
-# Defining variable section.
-  vars:
-    port: 80
-    server: example.com
 
 # Defining task section.
-  tasks:
+    - name: Configuring Nginx
+      ansible.builtin.debug:
+        msg: '[INFO] CONFIGURING NGINX...'
+
     - name: Applying configuration
-      template:
+      ansible.builtin.template:
         src: "templates/nginx.conf.j2"
         dest: "/etc/nginx/nginx.conf"
         mode: u=rw,g=w,o=r
 
     - name: Restarting Nginx
-      systemd:
+      ansible.builtin.systemd:
         name: nginx
         state: restarted
 
     - name: End message
-      debug:
-        msg: 'Finished, Nginx configured.'
+      ansible.builtin.debug:
+        msg: '[INFO] Finished, Nginx configured.'
 
-    - meta: end_play
+    - name: End Ansible playbook
+      ansible.builtin.meta: end_play
