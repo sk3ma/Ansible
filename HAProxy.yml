@@ -13,6 +13,10 @@
 
 # Defining task section.
   tasks:
+    - name: Installing Netdata
+      ansible.builtin.debug:
+        msg: '[INFO] INSTALLING HAPROXY...'
+
     - name: Installing dependencies
       ansible.builtin.apt:
         name: "{{ item }}"
@@ -48,7 +52,8 @@
       command: "haproxy -vv"
       register: results
 
-    - debug:
+    - name: Display version
+      ansible.builtin.debug:
         msg: "{{ results.stdout }}"
 
     - name: Enabling service
@@ -59,17 +64,9 @@
         notify:
         - restart proxy
 
-    - name: Issuing late commands
-      ansible.builtin.command:
-        cmd: |
-          haproxy -f /etc/haproxy.cfg
-          sudo systemctl status haproxy
-        chdir: /tmp
-      changed_when: false
-
-      - name: End status
-        debug:
-          msg: 'Finished, HAProxy installed.'
+    - name: End status
+      ansible.builtin.debug:
+        msg: '[INFO] Finished, HAProxy installed.'
 
 # Defining handler section.
   handlers:
@@ -80,4 +77,3 @@
 
       - name: End Ansible playbook
         ansible.builtin.meta: end_play
-
