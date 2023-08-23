@@ -36,6 +36,7 @@
       - name: Installing Zabbix package
         ansible.builtin.apt:
           deb: /opt/zagent2-bionic.deb
+        when: ansible_distribution_version == '18.04'
         ignore_errors: yes
 
       - name: Removing Zabbix source
@@ -76,23 +77,23 @@
       - name: Updating node hostname
         ansible.builtin.lineinfile:
           path: /etc/zabbix/zabbix_agent2.conf
-          regexp: 'Hostname=sur002-truservplus-pta3-016'
-          line: "Hostname=Live_web16"
-        when: ansible_hostname == 'sur002-truservplus-pta3-016'
+          regexp: 'Hostname=dev001-truservplus-pta3-016'
+          line: "Hostname=Dev_web16"
+        when: ansible_hostname == 'dev001-truservplus-pta3-016'
 
       - name: Updating node hostname
         ansible.builtin.lineinfile:
           path: /etc/zabbix/zabbix_agent2.conf
-          regexp: 'Hostname=sur002-truservplus-pta3-017'
-          line: "Hostname=Live_web17"
-        when: ansible_hostname == 'sur002-truservplus-pta3-017'
+          regexp: 'Hostname=dev001-truservplus-pta3-017'
+          line: "Hostname=Dev_web17"
+        when: ansible_hostname == 'dev001-truservplus-pta3-017'
 
       - name: Updating node hostname
         ansible.builtin.lineinfile:
           path: /etc/zabbix/zabbix_agent2.conf
-          regexp: 'Hostname=ip-172-31-21-191'
-          line: "Hostname=Live_aws"
-        when: ansible_hostname == 'ip-172-31-21-191'
+          regexp: 'Hostname=ip-172-31-79-182'
+          line: "Hostname=Dev_aws"
+        when: ansible_hostname == 'ip-172-31-79-182'
 
       - name: Removing Zabbix package
         ansible.builtin.file:
