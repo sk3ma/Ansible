@@ -11,7 +11,7 @@
   become: true
 
  # Defining task section.
-    - name: Uninstalling MongoDB server
+    - name: Installing Nginx
       ansible.builtin.debug:
         msg: '[INFO] INSTALLING NGINX...'
 
