@@ -55,6 +55,10 @@
         mode: 'u=rwx,g=rw,o=rw'
 
     - name: Spawning container
+      ansible.builtin.debug:
+        msg: '[INFO] STARTING CONTAINER...'
+
+    - name: Deploying Nginx
       ansible.builtindocker_container:
         image: nginx:latest
         name: nginx
@@ -74,7 +78,7 @@
 
     - name: End message
       ansible.builtindebug:
-        msg: '[OK] Finished, Docker installed.'
+        msg: '[OK] Finished, Docker installed and Nginx deployed.'
 
     - name: End playbook
       ansible.builtin.meta: end_play
