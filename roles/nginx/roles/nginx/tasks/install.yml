@@ -7,11 +7,10 @@
 # Defining target section.
 - name: Installing Nginx
   hosts: localhost
+  gather_facts: true
   become: true
-  gather_facts: yes
 
  # Defining task section.
-  tasks:
     - name: Uninstalling MongoDB server
       ansible.builtin.debug:
         msg: '[INFO] INSTALLING NGINX...'
@@ -48,7 +47,7 @@
         state: started
         enabled: yes
       notify:
-      - restart proxy
+      - restart nginx
 
     - name: Allowing HTTP
       ansible.builtin.ufw:
