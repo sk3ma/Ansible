@@ -12,8 +12,12 @@
 
  # Defining task section.
   tasks:
+    - name: Uninstalling MongoDB server
+      ansible.builtin.debug:
+        msg: '[INFO] INSTALLING NGINX...'
+
     - name: Installing dependencies
-      apt:
+      ansible.builtin.apt:
         name: "{{ item }}"
         state: latest
       with_items:
@@ -21,24 +25,25 @@
         - ca-certificates
 
     - name: Installing Nginx
-      apt:
+      ansible.builtin.apt:
         name: nginx
         state: present
         update_cache: yes
       ignore_errors: no
 
     - name: Index file
-      command: echo "<h1>Nginx is operational</h1>" > /usr/share/nginx/html/index.html
+      ansible.builtin.command: echo "<h1>Nginx is operational</h1>" > /usr/share/nginx/html/index.html
 
     - name: Get version
-      shell: nginx -v
+      ansible.builtin.shell: nginx -v
       register: results
 
-    - debug:
+    - name: Showing version
+    - ansible.builtin.debug:
         msg: "{{ results.stderr }}"
 
     - name: Allowing service
-      systemd:
+      ansible.builtin.systemd:
         name: nginx
         state: started
         enabled: yes
@@ -46,17 +51,17 @@
       - restart proxy
 
     - name: Allowing HTTP
-      ufw:
+      ansible.builtin.ufw:
         rule: allow
         port: 80
         proto: tcp
 
     - name: Allowing HTTPS
-      ufw:
+      ansible.builtin.ufw:
         rule: allow
         port: 443
         proto: tcp
 
     - name: End message
-      debug:
-        msg: 'Finished, Nginx installed.'
+      ansible.builtin.debug:
+        msg: '[INFO] Finished, Nginx installed.'
