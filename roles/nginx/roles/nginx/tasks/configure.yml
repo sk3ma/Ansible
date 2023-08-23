@@ -4,12 +4,6 @@
 # An Ansible playbook to configure Nginx on Ubuntu 20.04. #
 ###########################################################
 
-# Defining target section.
-- name: Configuring Nginx
-  hosts: localhost
-  gather_facts: true
-  become: true
-
 # Defining task section.
     - name: Configuring Nginx
       ansible.builtin.debug:
