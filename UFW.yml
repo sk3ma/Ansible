@@ -5,15 +5,19 @@
 ##################################################################
 
 # Defining target section.
-- name: Configuring UFW
+- name: UFW configuraton 
   hosts: all
   become: true
-  gather_facts: yes
+  gather_facts: true
 
 # Defining task section.
   tasks:
+  - name: Configuring UFW
+    ansible.builtin.debug:
+      msg: '[INFO] CONFIGURING UFW...'
+  
   - name: Deny incoming
-    ufw:
+    ansible.builtinufw:
       direction: incoming
       proto: any
       policy: deny
@@ -21,7 +25,7 @@
     - reload ufw
 
   - name: Allow outgoing
-    ufw:
+    ansible.builtinufw:
       direction: outgoing
       proto: any
       policy: allow
@@ -29,23 +33,25 @@
     - reload ufw
 
   - name: Allow SSH
-    ufw:
+    ansible.builtinufw:
       rule: allow
       name: OpenSSH
     notify:
     - reload ufw
 
   - name: Enable service
-    ufw:
+    ansible.builtinufw:
       state: enabled
 
-  - name: Printing end status
-    debug:
-      msg: 'Finished, firewall configured.'
+  - name: End status
+    ansible.builtindebug:
+      msg: '[OK] Finished, firewall configured.'
 
 # Defining handler section.
   handlers:
   - name: reload ufw
-    ufw:
+    ansible.builtinufw:
       state: reloaded
-...
+
+  - name: End playbook
+    ansible.builtin.meta: end_play
