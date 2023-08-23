@@ -4,12 +4,6 @@
 # An Ansible playbook to install Nginx on Ubuntu 20.04. #
 #########################################################
 
-# Defining target section.
-- name: Installing Nginx
-  hosts: localhost
-  gather_facts: true
-  become: true
-
  # Defining task section.
     - name: Installing Nginx
       ansible.builtin.debug:
