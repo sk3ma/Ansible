@@ -63,6 +63,10 @@
           name: zabbix-agent2
           state: stopped
 
+      - name: Configuring agent
+        ansible.builtin.debug:
+          msg: '[INFO] CONFIGURING AGENT...'
+
       - name: Purging original configuration
         file:
           path: /etc/zabbix/zabbix_agent2.conf
