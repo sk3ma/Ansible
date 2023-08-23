@@ -24,7 +24,7 @@
         ansible.builtin.apt:
           upgrade: no
           update_cache: yes
-        when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '18.04'
+        when: ansible_distribution == 'Ubuntu'
         ignore_errors: yes
 
       - name: Downloading Zabbix package
