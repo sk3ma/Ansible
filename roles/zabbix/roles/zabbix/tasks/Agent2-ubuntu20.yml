@@ -24,7 +24,7 @@
         ansible.builtin.apt:
           upgrade: no
           update_cache: yes
-        when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '20.04'
+        when: ansible_distribution == 'Ubuntu'
         ignore_errors: no
 
       - name: Downloading Zabbix package
@@ -36,6 +36,7 @@
       - name: Installing Zabbix package
         ansible.builtin.apt:
           deb: /opt/zagent2-focal.deb
+        when: ansible_distribution_version == '20.04'  
         ignore_errors: yes
 
       - name: Removing Zabbix source
@@ -62,6 +63,10 @@
           name: zabbix-agent2
           state: stopped
 
+      - name: Configuring agent
+        ansible.builtin.debug:
+          msg: '[INFO] CONFIGURING AGENT...'
+
       - name: Purging original configuration
         ansible.builtin.file:
           path: /etc/zabbix/zabbix_agent2.conf
@@ -76,30 +81,30 @@
       - name: Updating node hostname
         ansible.builtin.lineinfile:
           path: /etc/zabbix/zabbix_agent2.conf
-          regexp: 'Hostname=sur002-truservplus-pta3-022'
+          regexp: 'Hostname=dev001-truservplus-pta3-022'
           line: "Hostname=Dev_web22"
-        when: ansible_hostname == 'sur002-truservplus-pta3-022'
+        when: ansible_hostname == 'dev001-truservplus-pta3-022'
 
       - name: Updating node hostname
         ansible.builtin.lineinfile:
           path: /etc/zabbix/zabbix_agent2.conf
-          regexp: 'Hostname=sur002-truservplus-pta3-023'
+          regexp: 'Hostname=dev001-truservplus-pta3-023'
           line: "Hostname=Dev_web23"
-        when: ansible_hostname == 'sur002-truservplus-pta3-023'
+        when: ansible_hostname == 'dev001-truservplus-pta3-023'
 
       - name: Updating node hostname
         ansible.builtin.lineinfile:
           path: /etc/zabbix/zabbix_agent2.conf
-          regexp: 'Hostname=sur002-truservplus-pta3-024'
+          regexp: 'Hostname=dev001-truservplus-pta3-024'
           line: "Hostname=Dev_web24"
-        when: ansible_hostname == 'sur002-truservplus-pta3-024'
+        when: ansible_hostname == 'dev001-truservplus-pta3-024'
 
       - name: Updating node hostname
         ansible.builtin.lineinfile:
           path: /etc/zabbix/zabbix_agent2.conf
-          regexp: 'Hostname=ip-172-31-28-82'
+          regexp: 'Hostname=ip-172-31-28-85'
           line: "Hostname=Dev_aws"
-        when: ansible_hostname == 'ip-172-31-26-61'
+        when: ansible_hostname == '172-31-28-85'
 
       - name: Removing Zabbix package
         ansible.builtin.file:
