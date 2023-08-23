@@ -1,6 +1,6 @@
 ---
 - name: Tasks for nginx role
-  include_tasks: "{{ item }}"
+  ansible.builtin.include_tasks: "{{ item }}"
   loop:
     - install.yml
     - configure.yml
