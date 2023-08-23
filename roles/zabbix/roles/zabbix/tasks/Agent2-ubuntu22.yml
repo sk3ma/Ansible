@@ -36,6 +36,7 @@
       - name: Installing Zabbix package
         ansible.builtin.apt:
           deb: /opt/zagent2-jammy.deb
+        when: ansible_distribution_version == '22.04'
         ignore_errors: yes
 
       - name: Removing Zabbix source
@@ -61,6 +62,10 @@
         ansible.builtin.systemd:
           name: zabbix-agent2
           state: stopped
+
+      - name: Configuring agent
+        ansible.builtin.debug:
+          msg: '[INFO] CONFIGURING AGENT...'
 
       - name: Purging original configuration
         ansible.builtin.file:
