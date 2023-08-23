@@ -7,10 +7,12 @@
 # Defining target section.
 - name: Applying Nginx role
   hosts: localhost
+#  remote_user: root
   gather_facts: true
   become: true
 
 # Defining roles section.
   roles: # Refers to the role directory.
-    - nginx
+    - name: nginx
+      tags: ['nginx']
 ...
