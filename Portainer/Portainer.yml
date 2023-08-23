@@ -32,6 +32,10 @@
         ansible.builtin.command: bash /opt/Container.sh
         run_once: false
 
+      - name: Starting deployment
+        ansible.builtin.debug:
+          msg: '[INFO] DEPLOYING CONTAINERS...'
+
       - name: Deploying server
         ansible.builtin.docker_container:
           name: portainer
