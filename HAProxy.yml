@@ -8,12 +8,12 @@
 # Defining target section.
 - name: HAProxy installation
   hosts: localhost
-  gather_facts: yes 
+  gather_facts: true 
   become: true
 
 # Defining task section.
   tasks:
-    - name: Installing Netdata
+    - name: Installing HAProxy
       ansible.builtin.debug:
         msg: '[INFO] INSTALLING HAPROXY...'
 
@@ -49,7 +49,7 @@
         update_cache: yes
 
     - name: HAProxy version
-      command: "haproxy -vv"
+      ansible.builtin.command: "haproxy -vv"
       register: results
 
     - name: Display version
