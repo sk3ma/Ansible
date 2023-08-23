@@ -5,12 +5,6 @@
 # It will uninstall the old Zabbix agent, as well as install and configure Zabbix agent 2. #
 ############################################################################################
 
-# Defining target section.
-- name: Installing Zabbix agent 2
-  hosts: managed_nodes
-  gather_facts: true
-  become: true
-
 # Defining task section.
       - name: Installing agent
         ansible.builtin.debug:
