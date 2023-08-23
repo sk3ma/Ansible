@@ -1,0 +1,104 @@
+---
+
+#############################################################################
+# Ansible playbook to install Portainer and Edge agents onto managed nodes. #
+#############################################################################
+
+# Defining target section.
+- name: Portainer installation
+  hosts: managed_nodes
+  gather_facts: yes
+
+# Defining task section.
+  tasks:
+      - name: Copying script
+        copy: 
+          src: "scripts/Container.sh"
+          dest: /opt/Container.sh
+          mode: u=rwx,g=w,o=r
+
+      - name: Executing script
+        command: bash /opt/Container.sh
+        run_once: false
+
+      - name: Deploying server
+        docker_container:
+          name: portainer
+          image: portainer/portainer-ce:2.14.2
+          ports:
+            - "9443:9443"
+            - "8000:8000"
+          volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+            - /container:/data
+          restart_policy: always
+        when: ansible_hostname == 'portainer'
+
+      - name: Deploying agent
+        docker_container:
+          name: portainer_edge_agent
+          image: portainer/agent:2.14.2
+          state: started
+          restart: yes
+          ports:
+           - "9001:9001"
+          volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+            - /var/lib/docker/volumes:/var/lib/docker/volumes
+            - /:/host
+            - /container:/data
+          env:
+            EDGE: "1"
+            EDGE_ID: "898d7562-73cc-495d-abe2-9391b0b70ec9"
+            EDGE_KEY: "aHR0cHM6Ly8xOTIuMTY4LjU2Ljc1Ojk0NDN8MTkyLjE2OC41Ni43NTo4MDAwfGQ0OjU2OjMyOjFmOjg5OjllOmQ0OjZhOjkxOjhmOjZlOmUyOmY5OmMzOjc0OmQxfDM"
+            EDGE_INSECURE_POLL: "1"
+          restart_policy: always
+        when: ansible_hostname == 'node1'
+
+      - name: Deploying agent
+        docker_container:
+          name: portainer_edge_agent
+          image: portainer/agent:2.14.2
+          state: started
+          restart: yes
+          ports:
+           - "9001:9001"
+          volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+            - /var/lib/docker/volumes:/var/lib/docker/volumes
+            - /:/host
+            - /container:/data
+          env:
+            EDGE: "1"
+            EDGE_ID: "90207b21-8235-46c7-b332-e3dfdee04800"
+            EDGE_KEY: "aHR0cHM6Ly8xOTIuMTY4LjU2Ljc1Ojk0NDN8MTkyLjE2OC41Ni43NTo4MDAwfGQ0OjU2OjMyOjFmOjg5OjllOmQ0OjZhOjkxOjhmOjZlOmUyOmY5OmMzOjc0OmQxfDQ"
+            EDGE_INSECURE_POLL: "1"
+          restart_policy: always
+        when: ansible_hostname == 'node2'
+
+      - name: Deploying Nginx
+        docker_container:
+          image: nginx:latest
+          name: nginx
+          state: started
+          ports:
+            - "8080:80"
+          volumes:
+            - /container
+        when: ansible_hostname == 'node1' and ansible_hostname == 'node2'
+
+#      - name: Allowing ports
+#        ufw:
+#          rule: allow
+#          proto: tcp
+#          port: '{{ item }}'
+#        with_items:
+#          - 8000
+#          - 8080
+#          - 9001
+#          - 9443
+
+      - name: Printing message
+        debug:
+          msg: 'Finished, installation complete.'
+...
