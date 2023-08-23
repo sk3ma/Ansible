@@ -7,8 +7,8 @@
 # Defining target section.
 - name: Applying Zabbix role
   hosts: localhost
-  become: yes
-  gather_facts: yes
+  gather_facts: true
+  become: true
 
 # Defining roles section.
   roles: # Refers to the role directory.
