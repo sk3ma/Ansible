@@ -39,6 +39,14 @@
         when: ansible_distribution_version == '20.04'  
         ignore_errors: yes
 
+      - name: Get agent version
+        ansible.builtin.shell: zabbix_agent2 -V
+        register: results
+
+      - name: Showing agent version
+        ansible.builtin.debug:
+          msg: "{{ results.stdout }}"
+
       - name: Removing Zabbix source
         ansible.builtin.file:
           path: /etc/apt/sources.list.d/zabbix.list
