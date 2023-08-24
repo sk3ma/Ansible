@@ -33,7 +33,7 @@
 
     - name: Showing version
     - ansible.builtin.debug:
-        msg: "{{ results.stderr }}"
+        msg: "{{ results.stdout }}"
 
     - name: Allowing service
       ansible.builtin.systemd:
