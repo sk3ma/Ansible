@@ -32,6 +32,15 @@
         ansible.builtin.command: bash /opt/Container.sh
         run_once: false
 
+      - name: Getting version
+        ansible.builtin.command: "docker --version"
+        register: results
+        changed_when: false
+
+      - name: Display version
+        ansible.builtin.debug:
+          msg: "{{ results.stdout }}"
+
       - name: Starting deployment
         ansible.builtin.debug:
           msg: '[INFO] DEPLOYING CONTAINERS...'
