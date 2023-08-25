@@ -39,7 +39,7 @@
       register: results
 
     - name: Showing version
-    - ansible.builtin.debug:
+      ansible.builtin.debug:
         msg: "{{ results.stdout }}"
 
     - name: Allowing service
