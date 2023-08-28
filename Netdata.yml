@@ -1,9 +1,9 @@
 ---
 
-###################################################################################
-# This Ansible playbook will automate a Netdata installation on Ubuntu 20.04.     #
-# It will uninstall the Netdata agent, configure it and add a firewall exception. #
-###################################################################################
+#################################################################################
+# This Ansible playbook will automate a Netdata installation on Ubuntu 20.04.   #
+# It will install the Netdata agent, configure it and add a firewall exception. #
+#################################################################################
 
 # Defining target section.
 - name: Install and configure Netdata
@@ -23,7 +23,15 @@
         dest: /tmp/netdata-kickstart.sh
 
     - name: Executing script
-      ansible.builtin.shell: bash /tmp/netdata-kickstart.sh --no-updates --stable-channel --disable-telemetry --native-only --no-updates --non-interactive --disable-cloud
+      ansible.builtin.shell: >
+        bash /tmp/netdata-kickstart.sh
+        --no-updates
+        --stable-channel
+        --disable-telemetry
+        --native-only
+        --no-updates
+        --non-interactive
+        --disable-cloud
       args:
         chdir: /tmp
 
