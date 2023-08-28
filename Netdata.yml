@@ -58,7 +58,7 @@
       ansible.builtin.command:
         cmd: |
           ufw reload
-          sudo netdatacli reload-health 
+          netdatacli reload-health 
       changed_when: false
 
     - name: Checking status
