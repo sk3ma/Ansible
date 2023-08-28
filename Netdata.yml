@@ -24,13 +24,14 @@
         dest: /tmp/netdata-kickstart.sh
 
     - name: Executing script
-      ansible.builtin.shell: bassh /tmp/netdata-kickstart.sh --no-updates --stable-channel --disable-telemetry --native-only --no-updates --non-interactive --disable-cloud
+      ansible.builtin.shell: bash /tmp/netdata-kickstart.sh --no-updates --stable-channel --disable-telemetry --native-only --no-updates --non-interactive --disable-cloud
       args:
         chdir: /tmp
 
     - name: Getting version
       ansible.builtin.command: netdata --version
       register: results
+      changed_when: false
 
     - name: Showing version
       ansible.builtin.debug:
@@ -50,18 +51,16 @@
     - name: Allowing rule
       ansible.builtin.ufw:
         rule: allow
-        port: 19999/tcp
+        proto: tcp
+        port: 19999
+        state: enabled
 
-    - name: Reloading firewall
-      ansible.builtin.command: ufw reload
-      ignore_errors: yes
-
-# Defining handler section.
-  handlers:
-    - name: Restart Netdata
-      ansible.builtin.systemd:
-        name: netdata
-        state: restarted
+    - name: Late commands
+      ansible.builtin.command:
+        cmd: |
+          ufw reload
+          sudo netdatacli reload-health 
+      changed_when: false
 
     - name: Checking status
       ansible.builtin.systemd:
@@ -76,6 +75,13 @@
     - name: End status
       ansible.builtin.debug:
         msg: '[INFO] Finished, Netdata installed.'
+
+# Defining handler section.
+  handlers:
+    - name: Restart Netdata
+      ansible.builtin.systemd:
+        name: netdata
+        state: restarted
 
     - name: End playbook
       ansible.builtin.meta: end_play
