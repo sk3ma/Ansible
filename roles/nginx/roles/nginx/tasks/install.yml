@@ -24,15 +24,15 @@
         update_cache: yes
       ignore_errors: no
 
+    - name: Index file
+      ansible.builtin.command: echo "<h1>Nginx is operational</h1>" > /usr/share/nginx/html/index.html
+
     - name: Changing permissions
       ansible.builtin.file:
         path: /usr/share/nginx/html
         owner: www-data
         group: www-data
         recurse: true
-
-    - name: Index file
-      ansible.builtin.command: echo "<h1>Nginx is operational</h1>" > /usr/share/nginx/html/index.html
 
     - name: Get version
       ansible.builtin.shell: nginx -v
