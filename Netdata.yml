@@ -44,6 +44,10 @@
       ansible.builtin.debug:
         msg: "{{ results.stdout }}"
 
+    - name: Installing Netdata
+      ansible.builtin.debug:
+        msg: '[INFO] CONFIGURING NETDATA...'
+
     - name: Adding configuration
       ansible.builtin.lineinfile:
         path: /etc/netdata/netdata.conf
@@ -62,13 +66,6 @@
         port: 19999
         state: enabled
 
-    - name: Late commands
-      ansible.builtin.command:
-        cmd: |
-          ufw reload
-          netdatacli reload-health 
-      changed_when: false
-
     - name: Checking status
       ansible.builtin.systemd:
         name: netdata
@@ -78,6 +75,13 @@
     - name: Displaying status
       ansible.builtin.debug:
         var: netdata_status
+
+    - name: Late commands
+      ansible.builtin.command:
+        cmd: |
+          ufw reload
+          netdatacli reload-health 
+      changed_when: false
 
     - name: End status
       ansible.builtin.debug:
