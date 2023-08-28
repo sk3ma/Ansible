@@ -6,7 +6,7 @@ VERSION=$(lsb_release -cs)
 
 # Docker installation.
 install() {
-    echo -e "\e[96;1;3m[INFO] Distribution: ${DISTRO}\e[m"
+    echo -e "\e[96;1;3m[OK] Distribution: ${DISTRO}\e[m"
     echo -e "\e[32;1;3m[INFO] Updating system\e[m"
     apt update
     echo -e "\e[32;1;3m[INFO] Adding repository\e[m"
@@ -30,6 +30,7 @@ service() {
     echo -e "\e[33;1;3;5m[INFO] Finished, Docker installed.\e[m"
     exit
 }
+
 # Defining function.
 main() {
     install
