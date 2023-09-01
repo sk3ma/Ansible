@@ -1,0 +1,44 @@
+name: Playbook functional testing
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  lint-and-execute:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install pip
+        run: |
+          python -m ensurepip --default-pip
+          python -m pip install --upgrade pip
+        if: success()
+
+      - name: Install ansible-lint and yamllint
+        run: |
+          pip install ansible-lint yamllint
+        if: success()
+
+      - name: Lint Ansible playbook
+        run: |
+          ansible-lint HAProxy.yml
+          yamllint HAProxy.yml
+        continue-on-error: false
+
+      - name: Execute Ansible Playbook
+        run: |
+          if [ $? -eq 0 ]; then
+            ansible-playbook your_playbook.yml
+          else
+            echo "Linting failed. Playbook execution skipped."
+          fi
