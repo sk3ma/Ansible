@@ -44,7 +44,7 @@
       ansible.builtin.debug:
         msg: "{{ results.stdout }}"
 
-    - name: Installing Netdata
+    - name: Configuring Netdata
       ansible.builtin.debug:
         msg: '[INFO] CONFIGURING NETDATA...'
 
