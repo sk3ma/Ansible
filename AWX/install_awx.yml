@@ -12,7 +12,7 @@
 
 # Defining task section. 
   tasks:
-    - name: Installing dependencies
+    - name: Installing AWX
       ansible.builtin.debug:
         msg: '[INFO] INSTALLING AWX...'  
   
