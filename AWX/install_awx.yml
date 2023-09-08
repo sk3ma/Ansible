@@ -1,8 +1,8 @@
 ---
 
-#################################################################################
-# This Ansible playbook will install Zabbix and Netdata agents on Ubuntu 16.04. #
-#################################################################################
+######################################################################
+# This Ansible playbook will install AWX onto the local Ubuntu host. #
+######################################################################
 
 # Defining target section.
 - name: Installing AWX
