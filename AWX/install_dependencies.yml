@@ -8,7 +8,7 @@
 - name: Installing dependencies
   hosts: localhost
   gather_facts: true
-  become: yes
+  become: true
   
 # Defining task section.  
   tasks:
