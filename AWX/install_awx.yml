@@ -1,0 +1,53 @@
+---
+
+#################################################################################
+# This Ansible playbook will install Zabbix and Netdata agents on Ubuntu 16.04. #
+#################################################################################
+
+# Defining target section.
+- name: Installing AWX
+  hosts: localhost
+  become: yes
+
+# Defining task section. 
+  tasks:
+    - name: Installing dependencies
+      ansible.builtin.debug:
+        msg: '[INFO] INSTALLING AWX...'  
+  
+    - name: Downloading AWX
+      ansible.builtin.get_url:
+        url: https://github.com/ansible/awx/archive/17.1.0.zip
+        dest: /tmp/17.1.0.zip
+
+    - name: Unpacking AWX
+      ansible.builtin.unarchive:
+        src: /tmp/17.1.0.zip
+        dest: /tmp
+        remote_src: yes
+
+    - name: Configuring AWX
+      ansible.builtin.debug:
+        msg: '[INFO] CONFIGURING AWX...'
+
+    - name: Setting inventory
+      ansible.builtin.lineinfile:
+        path: /tmp/awx-17.1.0/installer/inventory
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+      with_items:
+        - { regexp: '^admin_user=', line: 'admin_user=admin' }
+        - { regexp: '^admin_password=', line: 'admin_password=password' }
+        - { regexp: '^secret_key=', line: 'secret_key={{ secret }}' }
+
+    - name: Execute playbook
+      ansible.builtin.command: ansible-playbook -i inventory install.yml
+      args:
+        chdir: /tmp/awx-17.1.0/installer
+
+    - name: End status
+      ansible.builtin.debug:
+        msg: '[INFO] Finished, AWX installed.'
+        
+    - name: End playbook
+      ansible.builtin.meta: end_play

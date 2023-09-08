@@ -1,0 +1,93 @@
+---
+
+#################################################################################
+# This Ansible playbook will install Zabbix and Netdata agents on Ubuntu 16.04. #
+#################################################################################
+
+# Defining target section.
+- name: Installing dependencies
+  hosts: localhost
+  gather_facts: true
+  become: yes
+  
+# Defining task section.  
+  tasks:
+    - name: Installing dependencies
+      ansible.builtin.debug:
+        msg: '[INFO] INSTALLING DEPENDENCIES...'
+  
+    - name: Updating system
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: Installing packages
+      ansible.builtin.apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - nodejs
+        - npm
+
+    - name: Installing npm
+      ansible.builtin.npm:
+        name: npm
+        global: yes
+
+    - name: Installing Ansible
+      ansible.builtin.apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - python3-pip
+        - git
+        - pwgen
+        - unzip
+        - ansible
+
+    - name: Generating secret
+      ansible.builtin.shell: pwgen -N 1 -s 40
+      register: secret_output
+
+    - name: Setting variable
+      set_fact:
+        secret: "{{ secret_output.stdout }}"
+    
+    - name: Install apt-transport-https, ca-certificates, curl, and software-properties-common
+      ansible.builtin.apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - apt-transport-https
+        - ca-certificates
+        - curl
+        - software-properties-common
+
+    - name: Adding key
+      ansible.builtin.apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Adding repository
+      ansible.builtin.apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
+        state: present
+
+    - name: Installing Docker
+      ansible.builtin.apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - docker-ce
+        - docker-compose
+
+    - name: Installing Compose
+      ansible.builtin.pip:
+        name: docker-compose==1.25.0
+        state: present
+
+    - name: Playbook execution
+      ansible.builtin.debug:
+        msg: '[INFO] EXECUTING PLAYBOOK...'
+
+    - name: Include playbook
+      ansible.builtin.include: install_awx.yml
