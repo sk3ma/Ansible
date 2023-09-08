@@ -7,7 +7,8 @@
 # Defining target section.
 - name: Installing AWX
   hosts: localhost
-  become: yes
+  gather_facts: true
+  become: true
 
 # Defining task section. 
   tasks:
