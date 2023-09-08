@@ -49,7 +49,7 @@
       register: secret_output
 
     - name: Setting variable
-      set_fact:
+      ansible.builtin.set_fact:
         secret: "{{ secret_output.stdout }}"
     
     - name: Install apt-transport-https, ca-certificates, curl, and software-properties-common
