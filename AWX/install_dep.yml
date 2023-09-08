@@ -85,6 +85,13 @@
         name: docker-compose==1.25.0
         state: present
 
+    - name: Late commands
+      ansible.builtin.command:
+        cmd: |
+          ansible --version
+          docker --version
+      changed_when: false
+
     - name: Playbook execution
       ansible.builtin.debug:
         msg: '[INFO] EXECUTING PLAYBOOK...'
