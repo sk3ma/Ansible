@@ -52,7 +52,7 @@
       ansible.builtin.set_fact:
         secret: "{{ secret_output.stdout }}"
     
-    - name: Install apt-transport-https, ca-certificates, curl, and software-properties-common
+    - name: Installing dependencies
       ansible.builtin.apt:
         name: "{{ item }}"
         state: present
