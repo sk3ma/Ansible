@@ -40,6 +40,7 @@
         - { regexp: '^admin_user=', line: 'admin_user=admin' }
         - { regexp: '^admin_password=', line: 'admin_password=password' }
         - { regexp: '^secret_key=', line: 'secret_key={{ secret }}' }
+      marker: "# {{ ansible_managed }}"
 
     - name: Execute playbook
       ansible.builtin.command: ansible-playbook -i inventory install.yml
