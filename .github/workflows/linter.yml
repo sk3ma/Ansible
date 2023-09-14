@@ -6,39 +6,45 @@ on:
       - main
 
 jobs:
-  lint-and-execute:
+  lint-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.x'
-
-      - name: Install pip
+      - name: Install packages
         run: |
-          python -m ensurepip --default-pip
-          python -m pip install --upgrade pip
+          sudo apt update
+          sudo apt install yamllint ansible-lint -y
+        shell: bash
         if: success()
 
-      - name: Install ansible-lint and yamllint
+      - name: Lint files
+        id: yamllint
         run: |
-          pip install ansible-lint yamllint
-        if: success()
+          yamllint /opt/ansible
+        continue-on-error: false
+        shell: bash
 
-      - name: Lint Ansible playbook
+      - name: Lint playbook
+        id: ansiblelint
         run: |
           ansible-lint HAProxy.yml
-          yamllint HAProxy.yml
         continue-on-error: false
+        shell: bash
 
-      - name: Execute Ansible Playbook
+      - name: Checking results
         run: |
-          if [ $? -eq 0 ]; then
-            ansible-playbook your_playbook.yml
+          if [[ ${{ steps.yamllint.outcome }} == "failure" || ${{ steps.ansiblelint.outcome }} == "failure" ]]; then
+            echo "Linting failed, exiting..."
+            exit 1
           else
-            echo "Linting failed. Playbook execution skipped."
+            echo "Linting passed, proceeding..."
           fi
+        shell: bash
+
+      - name: Execute playbook
+        run: |
+          ansible-playbook HAProxy.yml
+        shell: bash
