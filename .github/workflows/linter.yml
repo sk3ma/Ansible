@@ -31,7 +31,7 @@ jobs:
         id: ansiblelint
         shell: bash
         run: |
-          ansible-lint Portainer.yml
+          ansible-lint Docker.yml
         continue-on-error: true
 
       - name: Checking results
@@ -47,4 +47,4 @@ jobs:
       - name: Execute playbook
         shell: bash
         run: |
-          ansible-playbook Portainer.yml
+          ansible-playbook Docker.yml
