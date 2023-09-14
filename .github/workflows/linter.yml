@@ -25,14 +25,14 @@ jobs:
         shell: bash
         run: |
           yamllint /opt/ansible
-        continue-on-error: false
+        continue-on-error: true
 
       - name: Lint playbook
         id: ansiblelint
         shell: bash
         run: |
           ansible-lint Portainer.yml
-        continue-on-error: false
+        continue-on-error: true
 
       - name: Checking results
         shell: bash
