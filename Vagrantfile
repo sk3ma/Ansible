@@ -22,10 +22,8 @@ Vagrant.configure("2") do |config|
     # Preparing Ubuntu installation.
     c.vm.provision "shell", inline: <<-SHELL
       echo -e "\e[32;1;3m[INFO] Installing Ansible\e[m"
-      sudo apt update
-      sudo apt install software-properties-common tree -y
       sudo apt-add-repository ppa:ansible/ansible -y
-      sudo apt install ansible sshpass yamllint ansible-lint -y
+      sudo apt install ansible sshpass yamllint ansible-lint software-properties-common tree -y
       echo -e "\e[32;1;3m[INFO] Configuring Ansible\e[m"
       echo -e "192.168.56.70    controller" >> /etc/hosts
       echo -e "192.168.56.72    node1" >> /etc/hosts
