@@ -7,6 +7,7 @@
 # Defining target section.
 - name: Install Redis on Ubuntu
   hosts: localhost
+  gather_facts: true
   become: true
 
 # Defining variable section.
@@ -16,6 +17,10 @@
 
 # Defining task section.
   tasks:
+    - name: Installing Redis
+      ansible.builtin.debug:
+        msg: '[INFO] INSTALLING REDIS...'
+    
     - name: Debug IP
       ansible.builtin.debug:
         msg: "ip = {{ ip }}"
@@ -37,7 +42,7 @@
     - name: Installing dependencies
       ansible.builtin.apt:
         name: "{{ item }}"
-        state: latest
+        state: present
       loop:
         - gnupg2
         - ca-certificates
@@ -65,6 +70,10 @@
         state: latest
         update_cache: yes
 
+    - name: Configuring Redis
+      ansible.builtin.debug:
+        msg: '[INFO] CONFIGURING REDIS...'
+
     - name: Configure master
       block:
         - name: Update Redis configuration
@@ -82,6 +91,7 @@
             - { 'from': '^requirepass ', 'to': 'requirepass masterpassword' }
             - { 'from': '^maxmemory-policy ', 'to': 'maxmemory-policy noeviction' }
       when: server_type == 'master'
+      marker: "# {{ ansible_managed }}"
 
     - name: Configure slave
       block:
@@ -100,6 +110,7 @@
             - { 'from': '^# slaveof ', 'to': 'slaveof {{ master }} 6379' }
             - { 'from': '^slaveof ', 'to': 'slaveof {{ master }} 6379' }
       when: server_type == 'slave'
+      marker: "# {{ ansible_managed }}"
 
     - name: Confirm version
       ansible.builtin.command: "redis-server -v"
