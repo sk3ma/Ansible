@@ -17,7 +17,8 @@ Vagrant.configure("2") do |config|
     c.vm.hostname         = "controller"
     # Defining the network.
 #    c.vm.network "private_network", type: "dhcp"
-    c.vm.network "private_network", ip: "192.168.56.70"
+    c.vm.network "private_network", ip: "192.168.56.71"
+#    c.vm.network "forwarded_port", guest: 22, host: 2299, auto_correct: true
     c.vm.network "forwarded_port", guest: 80, host: 8080, auto_correct: true
     # Preparing Ubuntu installation.
     c.vm.provision "shell", inline: <<-SHELL
