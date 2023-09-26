@@ -68,7 +68,7 @@
           - "443:443"
         restart_policy: always
 
-    - name: Issuing late commands
+    - name: Late commands
       ansible.builtin.command:
         cmd: |
           sudo systemctl status docker
