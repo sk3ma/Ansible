@@ -1,0 +1,84 @@
+---
+
+###########################################################
+# An Ansible playbook to install Rancher on Ubuntu 20.04. #
+###########################################################
+
+# Defining target section.
+- name: Install Rancher on Ubuntu
+  hosts: localhost
+  gather_facts: true
+  become: true
+
+  # Defining task section.
+  tasks:
+    - name: Installing Docker
+      ansible.builtin.debug:
+        msg: '[INFO] INSTALLING DOCKER...'
+  
+    - name: Installing packages
+      ansible.builtin.apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - software-properties-common
+          - curl
+          - gnupg
+        state: latest
+        update_cache: true
+
+    - name: Adding key
+      ansible.builtin.apt_key:
+        url: "https://download.docker.com/linux/ubuntu/gpg"
+        state: present
+
+    - name: Adding repository
+      ansible.builtin.apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
+        state: present
+        filename: docker
+
+    - name: Updating system
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: Installing Docker
+      ansible.builtin.apt:
+        name: docker-ce
+        state: latest
+        ignore_errors: yes
+
+    - name: Creating directory
+      ansible.builtin.file:
+        path: "/container"
+        state: directory
+        mode: 'u=rwx,g=rw,o=rw'
+
+    - name: Spawning container
+      ansible.builtin.debug:
+        msg: '[INFO] STARTING CONTAINER...'
+
+    - name: Deploying Rancher
+      ansible.builtin.docker_container:
+        name: rancher
+        image: rancher/rancher:latest
+        state: started
+        ports:
+          - "80:80"
+          - "443:443"
+        restart_policy: always
+
+    - name: Issuing late commands
+      ansible.builtin.command:
+        cmd: |
+          sudo systemctl status docker
+          sudo docker ps -a
+        chdir: /container
+      changed_when: false
+
+    - name: End message
+      ansible.builtin.debug:
+        msg: '[OK] Finished, Docker installed and Rancher deployed.'
+
+    - name: End playbook
+      ansible.builtin.meta: end_play
