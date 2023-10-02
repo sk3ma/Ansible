@@ -1,0 +1,64 @@
+---
+
+##################################
+# Tasks for uninstalling MongoDB #
+##################################
+
+# Defining tasks section.
+- name: Uninstalling MongoDB server
+  ansible.builtin.debug:
+    msg: '[INFO] UNINSTALLING MONGODB...'
+
+- name: Stop MongoDB service
+  ansible.builtin.systemd:
+    name: mongod
+    state: stopped
+    enabled: false
+
+- name: Remove MongoDB package
+  ansible.builtin.apt:
+    name: mongodb-org*
+    state: absent
+    autoremove: true
+  when: ansible_distribution_version == '20.04'
+
+- name: Remove MongoSH package
+  ansible.builtin.command: "dpkg --purge mongodb-mongosh"
+  changed_when: true
+  when: ansible_distribution_version == '20.04'
+
+- name: Removing firewall rules
+  ansible.builtin.ufw:
+    rule: allow
+    proto: tcp
+    port: "{{ item }}"
+    from_ip: "{{ system_ip }}"
+    delete: yes
+  loop:
+    - "{{ mongo_port }}"
+    - "{{ netdata_port }}"
+
+#- name: Removing firewall rule
+#  ansible.builtin.ufw:
+#    rule: allow
+#    proto: tcp
+#    port: "{{ mongo_port }}"
+#    from_ip: "{{ system_ip }}"
+#    delete: true
+
+- name: Purge existing configuration
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - /etc/mongod.conf
+    - /usr/bin/mongod
+    - /var/lib/mongodb
+    - /var/log/mongodb
+
+- name: Printing end status
+  ansible.builtin.debug:
+    msg: '[INFO] Finished, MongoDB uninstalled.'
+
+- name: End Ansible playbook
+  ansible.builtin.meta: end_play

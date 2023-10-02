@@ -1,0 +1,76 @@
+---
+
+################################
+# Tasks for installing MongoDB #
+################################
+
+# Defining tasks section.
+- name: Installing MongoDB server
+  ansible.builtin.debug:
+    msg: '[INFO] INSTALLING MONGODB...'
+
+- name: Updating repositories
+  ansible.builtin.apt:
+    upgrade: no
+    update_cache: yes
+  when: ansible_distribution == 'Ubuntu'
+
+- name: Downloading MongoDB package
+  ansible.builtin.get_url:
+    url: "https://repo.mongodb.org/apt/ubuntu/dists/focal/mongodb-org/7.0/multiverse/binary-amd64/{{ db_version }}"
+    dest: "{{ file_path }}/{{ db_version }}"
+    mode: u=rw,g=w,o=r
+
+- name: Installing MongoDB package
+  ansible.builtin.apt:
+    deb: "{{ file_path }}/{{ db_version }}"
+    state: present
+  when: ansible_distribution_version == '20.04'
+
+- name: Get MongoDB version
+  ansible.builtin.command: "mongod --version"
+  register: results
+  changed_when: false
+
+- name: Display MongoDB version
+  ansible.builtin.debug:
+    msg: "{{ results.stdout }}"
+
+- name: Enabling MongoDB service
+  ansible.builtin.systemd:
+    name: mongod
+    enabled: true
+    state: started
+
+- name: Downloading MongoSH package
+  ansible.builtin.get_url:
+    url: "https://downloads.mongodb.com/compass/mongodb-{{ sh_version }}"
+    dest: "{{ file_path }}/{{ sh_version }}"
+    mode: u=rw,g=r,o=r
+
+- name: Installing MongoSH package
+  ansible.builtin.apt:
+    deb: "{{ file_path }}/{{ sh_version }}"
+    state: present
+  when: ansible_distribution_version == '20.04'
+
+- name: Get MongoSH version
+  ansible.builtin.command: "mongosh --version"
+  register: results
+  changed_when: false
+
+- name: Display MongoSH version
+  ansible.builtin.debug:
+    msg: "{{ results.stdout }}"
+
+- name: Remove downloaded packages
+  ansible.builtin.command:
+    cmd: |
+      rm -rf {{ db_version }}
+      rm -rf {{ sh_version }}
+    chdir: "{{ file_path }}"
+  changed_when: false
+
+- name: Printing end status
+  ansible.builtin.debug:
+    msg: '[INFO] Finished, MongoDB installed.'
