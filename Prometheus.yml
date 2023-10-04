@@ -1,0 +1,226 @@
+---
+
+#######################################################################################
+# Ansible playbook to install Prometheus, Node Exporter, and Grafana on Ubuntu 20.04. #
+# Playbook usage: `ansible-playbook Prometheus.yml -e server="<server-hostname>"`     #
+#######################################################################################
+
+# Defining target section.
+- name: Install Prometheus, Node Exporter, and Grafana
+  hosts: "{{ server }}"
+  become: true
+  gather_facts: true
+
+  # Defining task section.
+  tasks:
+    - name: Install Prometheus server
+      ansible.builtin.debug:
+        msg: '[INFO] INSTALLING PROMETHEUS SERVER...'
+
+    - name: Create Prometheus user
+      ansible.builtin.user:
+        name: prometheus
+        shell: /bin/false
+        create_home: no
+
+    - name: Node Exporter user
+      ansible.builtin.user:
+        name: node_exporter
+        shell: /bin/false
+        create_home: no
+
+    - name: Create Prometheus directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        owner: prometheus
+        group: prometheus
+        mode: '0755'
+      loop:
+        - /etc/prometheus
+        - /var/lib/prometheus
+
+    - name: Download Prometheus package
+      ansible.builtin.get_url:
+        url: https://github.com/prometheus/prometheus/releases/download/v2.47.0/prometheus-2.47.0.linux-amd64.tar.gz
+        dest: /tmp/prometheus.tar.gz
+      delegate_to: localhost
+      run_once: yes
+
+    - name: Extract Prometheus package
+      ansible.builtin.unarchive:
+        src: /tmp/prometheus.tar.gz
+        dest: /usr/local/bin/
+        remote_src: yes
+      become: yes
+      become_user: prometheus
+      become_method: sudo
+
+    - name: Configure Prometheus server
+      ansible.builtin.debug:
+        msg: '[INFO] CONFIGURING PROMETHEUS SERVER...'
+
+    - name: Create Prometheus configuration
+      ansible.builtin.copy:
+        content: |
+          global:
+            scrape_interval: 15s
+
+          scrape_configs:
+            - job_name: 'prometheus'
+              scrape_interval: 5s
+              static_configs:
+                - targets: ['localhost:9090']
+            - job_name: 'node_exporter'
+              scrape_interval: 5s
+              static_configs:
+                - targets: ['localhost:9100']
+        dest: /etc/prometheus/prometheus.yml
+        owner: prometheus
+        group: prometheus
+      notify:
+        - Reload Prometheus
+
+    - name: Create service file
+      ansible.builtin.copy:
+        content: |
+          [Unit]
+          Description=Prometheus
+          Wants=network-online.target
+          After=network-online.target
+
+          [Service]
+          User=prometheus
+          Group=prometheus
+          Type=simple
+          ExecStart=/usr/local/bin/prometheus \
+              --config.file /etc/prometheus/prometheus.yml \
+              --storage.tsdb.path /var/lib/prometheus/ \
+              --web.console.templates=/etc/prometheus/consoles \
+              --web.console.libraries=/etc/prometheus/console_libraries
+
+          [Install]
+          WantedBy=multi-user.target
+        dest: /etc/systemd/system/prometheus.service
+        owner: root
+        group: root
+      notify:
+        - Reload Prometheus
+
+    - name: Reload Prometheus service
+      ansible.builtin.systemd:
+        name: prometheus
+        state: restarted
+      async: 5
+      poll: 0
+
+    - name: Install Node Exporter
+      ansible.builtin.debug:
+        msg: '[INFO] INSTALLING NODE EXPORTER...'
+
+    - name: Download Node Exporter
+      ansible.builtin.get_url:
+        url: https://github.com/prometheus/node_exporter/releases/download/v1.6.1/node_exporter-1.6.1.linux-amd64.tar.gz
+        dest: /tmp/node_exporter.tar.gz
+      delegate_to: localhost
+      run_once: yes
+
+    - name: Extract Node Exporter
+      ansible.builtin.unarchive:
+        src: /tmp/node_exporter.tar.gz
+        dest: /usr/local/bin/
+        remote_src: yes
+      become: yes
+      become_user: node_exporter
+      become_method: sudo
+
+    - name: Create service file
+      ansible.builtin.copy:
+        content: |
+          [Unit]
+          Description=Node Exporter
+          Wants=network-online.target
+          After=network-online.target
+
+          [Service]
+          User=node_exporter
+          Group=node_exporter
+          Type=simple
+          ExecStart=/usr/local/bin/node_exporter
+
+          [Install]
+          WantedBy=multi-user.target
+        dest: /etc/systemd/system/node_exporter.service
+        owner: root
+        group: root
+      notify:
+        - Reload Node Exporter
+
+    - name: Reload Node Exporter
+      ansible.builtin.systemd:
+        name: node_exporter
+        state: restarted
+      async: 5
+      poll: 0
+
+    - name: Install Grafana server
+      ansible.builtin.debug:
+        msg: '[INFO] INSTALLING GRAFANA SERVER...'
+
+    - name: Download Grafana package
+      ansible.builtin.get_url:
+        url: https://dl.grafana.com/enterprise/release/grafana-enterprise-10.1.4.linux-amd64.tar.gz
+        dest: /tmp/grafana.tar.gz
+      delegate_to: localhost
+      run_once: yes
+
+    - name: Extract Grafana package
+      ansible.builtin.unarchive:
+        src: /tmp/grafana.tar.gz
+        dest: /opt/
+        remote_src: yes
+      become: yes
+
+    - name: Start Grafana service
+      ansible.builtin.systemd:
+        name: grafana-server
+        enabled: yes
+        state: started
+
+    - name: Confirm Grafana starts
+      ansible.builtin.wait_for:
+        port: 3000
+        timeout: 60
+
+    - name: Verify Prometheus port
+      ansible.builtin.uri:
+        url: http://localhost:9090
+        status_code: 200
+      register: prometheus_status
+
+    - name: Verify Node Exporter
+      ansible.builtin.uri:
+        url: http://localhost:9100
+        status_code: 200
+      register: node_exporter_status
+
+    - name: Verify Grafana port
+      ansible.builtin.uri:
+        url: http://localhost:3000
+        status_code: 200
+      register: grafana_status
+
+    - name: Display verification results
+      ansible.builtin.debug:
+        var: item.status
+      loop:
+        - "{{ prometheus_status }}"
+        - "{{ node_exporter_status }}"
+        - "{{ grafana_status }}"
+
+    - name: Display end result
+      ansible.builtin.debug:
+        msg: '[OK] MONITORING SOLUTION INSTALLED.'
+
+    - name: End Ansible playbook
+      ansible.builtin.meta: end_play
