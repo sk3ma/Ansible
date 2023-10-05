@@ -1,0 +1,156 @@
+---
+
+################################################################################
+# An Ansible playbook to install and configure the Loki stack on Ubuntu 22.04. #
+# Playbook usage: ansible-playbook -e server="localhost"                       #
+################################################################################
+
+# Defining target section
+- name: Install Loki stack on Ubuntu 20.04
+  hosts: "{{ hosts }}"
+  become: yes
+
+  # Defining task section.
+  tasks:
+    - name: Creating scripts directory
+      ansible.builtin.file:
+        path: /srv/scripts
+        state: directory
+        mode: u=rw,g=w,o=r
+
+    - name: Install prerequsite software
+      ansible.builtin.debug:
+        msg: '[INFO] INSTALL NECESSARY PACKAGES...'
+
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: yes
+      when:
+        - ansible_distribution == 'Ubuntu'
+        - ansible_distribution_version == '22.04'
+
+    - name: Install necessary packages
+      ansible.builtin.apt:
+        name: 
+          - apt-transport-https
+          - software-properties-common
+      when:
+        - ansible_distribution == 'Ubuntu'
+        - ansible_distribution_version == '22.04'
+
+    - name: Adding software repositories
+      ansible.builtin.debug:
+        msg: '[INFO] ADDING SOFTWARE REPOSITORIES...'
+
+    - name: Add Grafana repository
+      ansible.builtin.apt_repository:
+        repo: deb https://packages.grafana.com/oss/deb stable main
+        state: present
+        filename: grafana
+      when:
+        - ansible_distribution == 'Ubuntu'
+        - ansible_distribution_version == '22.04'
+
+    - name: Add Loki repository
+      ansible.builtin.apt_repository:
+        repo: deb https://packagecloud.io/grafana/loki/Ubuntu/ bionic main
+        state: present
+        filename: loki
+        validate_certs: no
+      when:
+        - ansible_distribution == 'Ubuntu'
+        - ansible_distribution_version == '22.04'
+
+    - name: Import Grafana key
+      ansible.builtin.apt_key:
+        url: https://packages.grafana.com/gpg.key
+        state: present
+      when:
+        - ansible_distribution == 'Ubuntu'
+        - ansible_distribution_version == '22.04'
+
+    - name: Install Loki stack
+      ansible.builtin.debug:
+        msg: '[INFO] INSTALLING LOKI STACK...'
+
+    - name: Install Loki stack
+      ansible.builtin.apt:
+        name: 
+          - loki
+          - promtail
+          - prometheus
+          - alertmanager
+          - grafana
+        state: present
+      when:
+        - ansible_distribution == 'Ubuntu'
+        - ansible_distribution_version == '22.04'
+
+    - name: Start system services
+      ansible.builtin.debug:
+        msg: '[INFO] STARTING SYSTEM SERVICES...'
+
+    - name: Start stack services
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        state: started
+        enabled: yes
+      loop:
+        - promtail
+        - prometheus
+        - alertmanager
+        - loki
+        - grafana-server
+      when:
+        - ansible_distribution == 'Ubuntu'
+        - ansible_distribution_version == '22.04'
+
+    - name: Reset Grafana password
+      ansible.builtin.command: grafana-cli admin reset-admin-password 1q2w3e4r5t
+      ignore_errors: yes
+      when:
+        - ansible_distribution == 'Ubuntu'
+        - ansible_distribution_version == '22.04'
+      changed_when: false
+
+    - name: Reload systemd daemon
+      ansible.builtin.command: systemctl daemon-reload
+      when:
+        - ansible_distribution == 'Ubuntu'
+        - ansible_distribution_version == '22.04'
+      changed_when: false
+
+    - name: Enable system services
+      ansible.builtin.debug:
+        msg: '[INFO] ENABLING SYSTEM SERVICES...'
+      
+    - name: Enable services at boot
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        enabled: yes
+      loop:
+        - promtail
+        - prometheus
+        - alertmanager
+        - loki
+        - grafana-server
+      when: ansible_os_family == 'Ubuntu'
+
+    - name: Verify Grafana status
+      ansible.builtin.uri:
+        url: http://localhost:3000/api/health
+        method: GET
+        status_code: 200
+        timeout: 60
+      register: grafana_health
+      until: grafana_health.status == 200
+      retries: 30
+      delay: 10
+      when: ansible_os_family == 'Ubuntu'
+
+    - name: Display end result
+      ansible.builtin.debug:
+        msg: '[OK] LOKI STACK INSTALLED.'
+
+    - name: End Ansible playbook
+      ansible.builtin.meta: end_play
