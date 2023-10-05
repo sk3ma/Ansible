@@ -2,13 +2,14 @@
 
 ################################################################################
 # An Ansible playbook to install and configure the Loki stack on Ubuntu 22.04. #
-# Playbook usage: ansible-playbook -e server="localhost"                       #
+# Playbook usage: `ansible-playbook -e server="localhost"`                     #
 ################################################################################
 
 # Defining target section
-- name: Install Loki stack on Ubuntu 20.04
+- name: Install Loki stack on Ubuntu 22.04
   hosts: "{{ hosts }}"
-  become: yes
+  become: true
+  gather_facts: true
 
   # Defining task section.
   tasks:
@@ -24,7 +25,7 @@
 
     - name: Update apt cache
       ansible.builtin.apt:
-        update_cache: yes
+        update_cache: true
       when:
         - ansible_distribution == 'Ubuntu'
         - ansible_distribution_version == '22.04'
@@ -53,10 +54,10 @@
 
     - name: Add Loki repository
       ansible.builtin.apt_repository:
-        repo: deb https://packagecloud.io/grafana/loki/Ubuntu/ bionic main
+        repo: deb https://packagecloud.io/grafana/loki/Ubuntu/ jammy main
         state: present
         filename: loki
-        validate_certs: no
+        validate_certs: false
       when:
         - ansible_distribution == 'Ubuntu'
         - ansible_distribution_version == '22.04'
@@ -94,7 +95,7 @@
       ansible.builtin.systemd:
         name: "{{ item }}"
         state: started
-        enabled: yes
+        enabled: true
       loop:
         - promtail
         - prometheus
@@ -107,7 +108,7 @@
 
     - name: Reset Grafana password
       ansible.builtin.command: grafana-cli admin reset-admin-password 1q2w3e4r5t
-      ignore_errors: yes
+      ignore_errors: true
       when:
         - ansible_distribution == 'Ubuntu'
         - ansible_distribution_version == '22.04'
@@ -127,7 +128,7 @@
     - name: Enable services at boot
       ansible.builtin.systemd:
         name: "{{ item }}"
-        enabled: yes
+        enabled: true
       loop:
         - promtail
         - prometheus
