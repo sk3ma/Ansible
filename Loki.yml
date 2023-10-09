@@ -135,7 +135,9 @@
         - alertmanager
         - loki
         - grafana-server
-      when: ansible_os_family == 'Ubuntu'
+      when:
+        - ansible_distribution == 'Ubuntu'
+        - ansible_distribution_version == '22.04'
 
     - name: Verify Grafana status
       ansible.builtin.uri:
@@ -147,7 +149,9 @@
       until: grafana_health.status == 200
       retries: 30
       delay: 10
-      when: ansible_os_family == 'Ubuntu'
+      when:
+        - ansible_distribution == 'Ubuntu'
+        - ansible_distribution_version == '22.04'
 
     - name: Display end result
       ansible.builtin.debug:
