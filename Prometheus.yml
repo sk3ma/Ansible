@@ -21,13 +21,13 @@
       ansible.builtin.user:
         name: prometheus
         shell: /bin/false
-        create_home: no
+        create_home: false
 
     - name: Node Exporter user
       ansible.builtin.user:
         name: node_exporter
         shell: /bin/false
-        create_home: no
+        create_home: false
 
     - name: Create Prometheus directories
       ansible.builtin.file:
@@ -45,14 +45,14 @@
         url: https://github.com/prometheus/prometheus/releases/download/v2.47.0/prometheus-2.47.0.linux-amd64.tar.gz
         dest: /tmp/prometheus.tar.gz
       delegate_to: localhost
-      run_once: yes
+      run_once: true
 
     - name: Extract Prometheus package
       ansible.builtin.unarchive:
         src: /tmp/prometheus.tar.gz
         dest: /usr/local/bin/
-        remote_src: yes
-      become: yes
+        remote_src: true
+      become: true
       become_user: prometheus
       become_method: sudo
 
@@ -123,14 +123,14 @@
         url: https://github.com/prometheus/node_exporter/releases/download/v1.6.1/node_exporter-1.6.1.linux-amd64.tar.gz
         dest: /tmp/node_exporter.tar.gz
       delegate_to: localhost
-      run_once: yes
+      run_once: true
 
     - name: Extract Node Exporter
       ansible.builtin.unarchive:
         src: /tmp/node_exporter.tar.gz
         dest: /usr/local/bin/
-        remote_src: yes
-      become: yes
+        remote_src: true
+      become: true
       become_user: node_exporter
       become_method: sudo
 
@@ -172,19 +172,18 @@
         url: https://dl.grafana.com/enterprise/release/grafana-enterprise-10.1.4.linux-amd64.tar.gz
         dest: /tmp/grafana.tar.gz
       delegate_to: localhost
-      run_once: yes
+      run_once: true
 
     - name: Extract Grafana package
       ansible.builtin.unarchive:
         src: /tmp/grafana.tar.gz
         dest: /opt/
-        remote_src: yes
-      become: yes
+        remote_src: true
 
     - name: Start Grafana service
       ansible.builtin.systemd:
         name: grafana-server
-        enabled: yes
+        enabled: true
         state: started
 
     - name: Confirm Grafana starts
