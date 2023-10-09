@@ -217,6 +217,13 @@
         - "{{ node_exporter_status }}"
         - "{{ grafana_status }}"
 
+    - name: Issuing late commands
+      ansible.builtin.command:
+        cmd: |
+          sudo systemctl status prometheus
+          sudo systemctl status node_exporter
+      changed_when: false
+
     - name: Display end result
       ansible.builtin.debug:
         msg: '[OK] MONITORING SOLUTION INSTALLED.'
