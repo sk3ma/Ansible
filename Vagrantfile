@@ -63,6 +63,7 @@ STOP
     x.vm.network "forwarded_port", guest: 80, host: 8081, auto_correct: true
     # Preparing Ubuntu installation.
     x.vm.provision "shell", inline: <<-SHELL
+      sudo apt update && sudo apt install screenfetch -y
       cat << STOP > /etc/hosts
 127.0.0.1       localhost
 127.0.1.1       node1
