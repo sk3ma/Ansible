@@ -64,6 +64,7 @@ STOP
     # Preparing Ubuntu installation.
     x.vm.provision "shell", inline: <<-SHELL
       sudo apt update && sudo apt install screenfetch -y
+      echo '/usr/bin/screenfetch' >> /home/vagrant/.bashrc
       cat << STOP > /etc/hosts
 127.0.0.1       localhost
 127.0.1.1       node1
