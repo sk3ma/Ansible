@@ -23,6 +23,8 @@ Vagrant.configure("2") do |config|
     # Preparing Ubuntu installation.
     c.vm.provision "shell", inline: <<-SHELL
       echo -e "\e[32;1;3m[INFO] Installing Ansible\e[m"
+      sudo apt update && sudo apt install screenfetch -y
+      echo '/usr/bin/screenfetch' >> /home/vagrant/.bashrc
       sudo apt-add-repository ppa:ansible/ansible -y
       sudo apt install ansible sshpass yamllint ansible-lint software-properties-common tree -y
       echo -e "\e[32;1;3m[INFO] Configuring Ansible\e[m"
@@ -82,6 +84,8 @@ STOP
     y.vm.network "forwarded_port", guest: 80, host: 8082, auto_correct: true
     # Preparing Ubuntu installation.
     y.vm.provision "shell", inline: <<-SHELL
+      sudo apt update && sudo apt install screenfetch -y
+      echo '/usr/bin/screenfetch' >> /home/vagrant/.bashrc
       cat << STOP > /etc/hosts
 127.0.0.1       localhost
 127.0.1.1       node2
