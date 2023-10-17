@@ -50,6 +50,8 @@ become_ask_pass = False
 STOP
       echo -e "\e[36;1;3;5m[INFO] System online\e[m"
     SHELL
+      # Script to bootstrap.
+#      c.vm.provision "shell", path: "Ansible.sh", privileged: true
     end
   # Customizing Ubuntu server.
     config.vm.define "node1" do |x|
