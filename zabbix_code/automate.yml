@@ -1,0 +1,67 @@
+---
+
+###############################################################################
+# An Ansible playbook to add a host, hostgroup and apply templates to Zabbix. #
+###############################################################################
+
+# Defining target section.
+- name: Automate Zabbix tasks
+  hosts: "{{ servers }}"
+  become: true
+  gather_facts: true
+
+
+  # Defining task section.
+  tasks:
+    - name: Automate host creation
+      ansible.builtin.debug:
+        msg: '[INFO] CREATING ZABBIX HOST...'
+
+    - name: Creating Zabbix host
+      community.zabbix.zabbix_host:
+        server_url: http://zabbixcentral.mycompany.com/api_jsonrpc.php
+        login_user: admin
+        login_password: 1q2w3e4r5t
+        host_name: cattle-dev-websrv
+        visible_name: dev-web
+        interfaces:
+          - type: 1
+            main: 1
+            ip: 192.168.56.80
+            dns: zabbixcentral.mycompany.com
+        groups:
+          - name: Development Group
+        state: present
+
+    - name: Automate group creation
+      ansible.builtin.debug:
+        msg: '[INFO] CREATING HOST GROUP...'
+
+    - name: Add Host to Host Group
+      community.zabbix.zabbix_host_group:
+        server_url: http://zabbixcentral.mycompany.com/api_jsonrpc.php
+        login_user: admin
+        login_password: 1q2w3e4r5t
+        host_name: dev-web
+        host_groups:
+          - Development Group
+        state: present
+
+    - name: Automate host templates
+      ansible.builtin.debug:
+        msg: '[INFO] ADDING HOST TEMPLATES...'
+
+    - name: Add Templates to Host
+      community.zabbix.zabbix_host_template:
+        server_url: http://zabbixcentral.mycompany.com/api_jsonrpc.php
+        login_user: admin
+        login_password: 1q2w3e4r5t
+        host_name: dev-web
+        templates:
+          - Template OS Linux
+          - Nginx by Zabbix agent
+        state: present
+
+    - name: Display end result
+      ansible.builtin.debug:
+        msg: '[OK] FINISHED, TASKS COMPLETED.'
