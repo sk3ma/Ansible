@@ -10,7 +10,6 @@
   become: true
   gather_facts: true
 
-
   # Defining task section.
   tasks:
     - name: Automate host creation
