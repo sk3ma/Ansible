@@ -1,0 +1,163 @@
+---
+
+################################################################
+# Ansible playbook to install Zabbix server 6 on Ubuntu 20.04. #
+################################################################
+
+# Defining target section.
+- name: Install Zabbix on Ubuntu 20.04
+  hosts: localhost
+  gather_facts: true 
+  become: true
+ 
+  # Defining variable section.
+  vars_files:
+    - vars.yml
+
+  # Defining task section.
+  tasks:
+    - name: Installing web components
+      ansible.builtin.debug:
+        msg: '[INFO] INSTALLING WEB COMPONENTS...'
+
+    - name: Installing Apache binary
+      ansible.builtin.apt:
+        name: apache2, apache2-utils
+        state: present
+
+    - name: Starting Apache service
+      ansible.builtin.systemd:
+        name: apache2
+        state: started
+        enabled: true
+
+    - name: Creatng Apache file
+      ansible.builtin.copy:
+        content: "<h1>Apache is operational</h1>"
+        dest: /var/www/html/index.html
+
+    - name: Installng PHP modules
+      ansible.builtin.apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - libapache2-mod-php7.4
+        - php7.4
+        - php7.4-cli
+        - php7.4-curl
+        - php7.4-common
+        - php7.4-dev
+        - php7.4-fpm
+        - php7.4-gd
+        - php7.4-mbstring
+        - php7.4-mysql
+
+    - name: Creating PHP file
+      ansible.builtin.copy:
+        content: "<?php phpinfo(); ?>"
+        dest: /var/www/html/info.php
+
+    - name: Adding MariaDB repository
+      ansible.builtin.apt_repository:
+        repo: "deb [arch=amd64] http://downloads.mariadb.com/MariaDB/mariadb-10.6/repo/ubuntu focal main"
+
+    - name: Installing MariaDB server
+      ansible.builtin.apt:
+        name: mariadb-server
+        state: present
+
+    - name: Starting MariaDB service
+      ansible.builtin.systemd:
+        name: mysql
+        state: started
+        enabled: true
+
+    - name: Configure MariaDB server
+      ansible.builtin.debug:
+        msg: '[INFO] CONFIGURING MARIADB SERVER...'
+
+    - name: Reconfigure MariaDB server
+      ansible.builtin.expect:
+        command: mysql_secure_installation
+        responses:
+          'Enter current password for root (enter for none):': '\r'
+          'Set root password? [Y/n]': 'y\r'
+          'New password:': 'zuA_IWj5\r'
+          'Re-enter new password:': 'zuA_IWj5\r'
+          'Remove anonymous users? [Y/n]': 'y\r'
+          'Disallow root login remotely? [Y/n]': 'y\r'
+          'Remove test database and access to it? [Y/n]': 'y\r'
+          'Reload privilege tables now? [Y/n]': 'y\r'
+
+    - name: Configure Zabbix database
+      ansible.builtin.mysql_db:
+        name: zabbix_db
+        state: present
+        collation: utf8_bin
+
+    - name: Create Zabbix user
+      ansible.builtin.mysql_user:
+        name: zabbix_user
+        password: y5VgWsOK
+        host: "%"
+        priv: 'zabbix_db.*:ALL'
+
+    - name: Installing Zabbix server
+      ansible.builtin.debug:
+        msg: '[INFO] INSTALLING ZABBIX SERVER...'
+
+    - name: Add Zabbix APT repository
+      ansible.builtin.apt_repository:
+        repo: "deb [arch=amd64] http://repo.zabbix.com/zabbix/6.0/ubuntu focal main"
+
+    - name: Install Zabbix Packages
+      ansible.builtin.apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - zabbix-agent
+        - zabbix-server-mysql
+        - php-mysql
+        - zabbix-frontend-php
+        - zabbix-sql-scripts
+        - zabbix-apache-conf
+
+    - name: Starting Zabbix service
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        state: started
+        enabled: true
+      loop:
+        - zabbix-server
+        - zabbix-agent
+
+    - name: Import Zabbix database
+      ansible.builtin.mysql_db:
+        name: zabbix_db
+        state: import
+        target: /usr/share/zabbix-sql-scripts/mysql/server.sql.gz
+        login_user: zabbix_user
+        login_password: y5VgWsOK
+
+    - name: Configure Zabbix server
+      ansible.builtin.template:
+        src: zabbix_server.conf.j2
+        dest: /etc/zabbix/zabbix_server.conf
+        owner: root
+        group: root
+        mode: '0644'
+      notify: Reload Zabbix service
+
+    - name: Display end status
+      ansible.builtin.debug:
+        msg: '[OK] FINISHED, SERVER INSTALLED.'
+
+  # Defining handler section.
+  handlers:
+    - name: Reload Zabbix service
+      ansible.builtin.systemd:
+        name: zabbix-server
+        state: restarted
+
+    - name: End Ansible playbook
+      ansible.builtin.meta: end_play

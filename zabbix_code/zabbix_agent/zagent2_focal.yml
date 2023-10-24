@@ -1,0 +1,196 @@
+---
+
+####################################################################################
+# An Ansible playbook to install and configure the Zabbix Agent 2 on Ubuntu 20.04. #
+####################################################################################
+
+# Defining target section.
+- name: Installing Zabbix Agent (Focal)
+  hosts: "{{ servers }}"
+  become: true
+  gather_facts: true
+
+  # Defining variable section.
+  vars:
+    zabbix_version: "6.0"
+    passive_server: "192.168.56.73,192.168.56.74"
+    active_server: "192.168.56.74:10051"
+
+  # Defining task section.
+  tasks:
+    - name: Creating scripts directory
+      ansible.builtin.file:
+        path: /srv/scripts
+        state: directory
+        mode: u=rw,g=w,o=r
+
+    - name: Uninstalling old agent
+      ansible.builtin.debug:
+        msg: '[INFO] UNINSTALL ZABBIX AGENT...'
+
+    - name: Create uninstall script
+      ansible.builtin.copy:
+        content: |
+          #!/bin/bash
+          purge() {
+              echo -e "\e[32;1;3m[INFO] Removing agent\e[m"
+              sudo systemctl stop zabbix-agent
+              sudo apt purge --auto-remove zabbix-agent -y
+              echo -e "\e[32;1;3m[INFO] Removing configuration\e[m"
+              sudo rm -rf /etc/zabbix/*
+              sudo rm -rf /var/log/zabbix-agent/*
+              sudo rm -rf /var/run/zabbix/
+              echo -e "\e[33;1;3m[OK] Finished, agent removed.\e[m" 
+          }
+
+          if [ -x /usr/sbin/zabbix_agentd ]; then
+              echo "Zabbix agent found, proceeding."
+              purge; else
+              echo "Zabbix agent not found, exiting."
+          fi
+        dest: /srv/scripts/uninstall.sh
+        mode: '0755'
+
+    - name: Execute uninstall script
+      ansible.builtin.command: /srv/scripts/uninstall.sh
+      changed_when: false
+
+    - name: Adding Zabbix repository
+      ansible.builtin.debug:
+        msg: '[INFO] ADDING ZABBIX REPOSITORY...'
+
+    - name: Adding repository key
+      ansible.builtin.apt_key:
+        url: https://repo.zabbix.com/zabbix-official-repo.key
+        state: present
+
+    - name: Add Zabbix repository
+      ansible.builtin.copy:
+        dest: "/etc/apt/sources.list.d/zabbix.list"
+        content: |
+          deb [arch=amd64] http://repo.zabbix.com/zabbix/{{ zabbix_version }}/ubuntu focal main
+          deb-src [arch=amd64] http://repo.zabbix.com/zabbix/{{ zabbix_version }}/ubuntu focal main
+
+    - name: Installing Zabbix Agent
+      ansible.builtin.debug:
+        msg: '[INFO] INSTALLING ZABBIX AGENT...'
+
+    - name: Installing Zabbix agent
+      ansible.builtin.apt:
+        name: zabbix-agent2
+        state: present
+        update_cache: true
+      when:
+        - ansible_distribution == 'Ubuntu'
+        - ansible_distribution_version == '20.04'
+
+    - name: Get agent version
+      ansible.builtin.shell: zabbix_agent2 -V | grep {{ zabbix_version }}
+      register: results
+
+    - name: Showing agent version
+      ansible.builtin.debug:
+        msg: "{{ results.stdout }}"
+
+    - name: Configuring Zabbix Agent
+      ansible.builtin.debug:
+        msg: '[INFO] CONFIGURING ZABBIX AGENT...'
+
+    - name: Remove current confguration
+      ansible.builtin.lineinfile:
+        path: "/etc/zabbix/zabbix_agent2.conf"
+        regexp: "{{ item }}"
+        state: absent
+      with_items:
+        - "^Server="
+        - "^ServerActive="
+        - "^Hostname="
+        - "^HostMetadata="
+      run_once: true
+
+    - name: Get system hostname
+      ansible.builtin.set_fact:
+        actual_hostname: "{{ ansible_hostname }}"
+
+    - name: Updating agent configuration (Server)
+      ansible.builtin.lineinfile:
+        path: "/etc/zabbix/zabbix_agent2.conf"
+        insertafter: "^# Server="
+        line: "Server={{ passive_server }}"
+
+    - name: Updating agent configuration (ServerActive)
+      ansible.builtin.lineinfile:
+        path: "/etc/zabbix/zabbix_agent2.conf"
+        insertafter: "^# ServerActive="
+        line: "ServerActive={{ active_server }}"
+
+    - name: Updating agent configuration (Hostname)
+      ansible.builtin.lineinfile:
+        path: "/etc/zabbix/zabbix_agent2.conf"
+        insertafter: "^# Hostname="
+        line: "Hostname={{ actual_hostname }}"
+
+    - name: Updating agent configuration (HostMetadata)
+      ansible.builtin.lineinfile:
+        path: "/etc/zabbix/zabbix_agent2.conf"
+        insertafter: "^# HostMetadata"
+        line: "HostMetadata=Linux"
+
+    - name: Updating agent configuration (AllowKey)
+      ansible.builtin.lineinfile:
+        path: "/etc/zabbix/zabbix_agent2.conf"
+        insertafter: "^# AllowKey="
+        line: "AllowKey=system.run[*]"
+
+    - name: Updating agent configuration (Timeout)
+      ansible.builtin.lineinfile:
+        path: "/etc/zabbix/zabbix_agent2.conf"
+        insertafter: "^# Timeout="
+        line: "Timeout=30"
+
+    - name: Updating agent configuration (Include)
+      ansible.builtin.lineinfile:
+        path: "/etc/zabbix/zabbix_agent2.conf"
+        insertafter: "^# Include="
+        line: "Include=/etc/zabbix/zabbix_agent2.d/*.conf"
+
+    - name: Updating agent configuration (RefreshActiveChecks)
+      ansible.builtin.lineinfile:
+        path: "/etc/zabbix/zabbix_agent2.conf"
+        insertafter: "^# RefreshActiveChecks="
+        line: "RefreshActiveChecks=120"
+
+    - name: Adding Netdata monitoring
+      ansible.builtin.copy:
+        dest: "/etc/zabbix/zabbix_agent2.d/netdata.conf"
+        mode: 0644
+        owner: root
+        content: |
+          UserParameter=netdata[*],curl -s 'http://localhost:19999/api/v1/allmetrics' | grep $1 | cut -d'"' -f2 | head -n1
+
+    - name: Starting agent service
+      ansible.builtin.debug:
+        msg: '[INFO] STARTING ZABBIX AGENT...'
+
+    - name: Enabling agent service
+      ansible.builtin.systemd:
+        name: zabbix-agent2
+        state: started
+        enabled: true
+      when:
+        - ansible_distribution == 'Ubuntu'
+        - ansible_distribution_version == '20.04'
+
+    - name: Restarting agent service
+      ansible.builtin.shell:
+        cmd: |
+          systemctl unmask zabbix-agent2
+          systemctl restart zabbix-agent2
+      changed_when: false
+
+    - name: Display end result
+      ansible.builtin.debug:
+        msg: '[OK] ZABBIX AGENT INSTALLED...'
+
+    - name: End Ansible playbook
+      ansible.builtin.meta: end_play

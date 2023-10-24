@@ -1,0 +1,294 @@
+---
+
+##################################################################################
+# An Ansible playbook to install and configure the Zabbix Proxy on Ubuntu 22.04. #
+##################################################################################
+
+# Defining target section.
+- name: Install Zabbix Proxy (Jammy)
+  hosts: "{{ servers }}"
+  become: true
+  gather_facts: true
+
+  # Defining variable section.
+  vars:
+    zabbix_server: "192.168.56.73"
+
+  # Defining task section.
+  tasks:
+    - name: Install SQLite package
+      ansible.builtin.debug:
+        msg: '[INFO] INSTALLING SQLITE PACKAGE...'
+
+    - name: Install SQLite package
+      ansible.builtin.apt:
+        name: sqlite3
+        state: present
+      tags: [install]
+
+    - name: Adding Zabbix repository
+      ansible.builtin.debug:
+        msg: '[INFO] ADDING ZABBIX REPOSITORY...'
+
+    - name: Adding repository key
+      ansible.builtin.apt_key:
+        url: https://repo.zabbix.com/zabbix-official-repo.key
+        state: present
+      tags: [update]
+
+    - name: Updating Zabbix source
+      ansible.builtin.copy:
+        dest: "/etc/apt/sources.list.d/zabbix.list"
+        content: |
+          deb [arch=amd64] http://repo.zabbix.com/zabbix/6.0/ubuntu jammy main
+          deb-src [arch=amd64] http://repo.zabbix.com/zabbix/6.0/ubuntu jammy main
+      when:
+        - ansible_distribution == 'Ubuntu'
+        - ansible_distribution_version == '22.04'
+      tags: [configure]
+
+    - name: Updating system repository
+      ansible.builtin.apt:
+        update_cache: true
+      when:
+        - ansible_distribution == 'Ubuntu'
+        - ansible_distribution_version == '22.04'
+      tags: [update]
+
+    - name: Installing Zabbix proxy
+      ansible.builtin.debug:
+        msg: '[INFO] INSTALLING ZABBIX PROXY...'
+
+    - name: Configure sources file
+      ansible.builtin.copy:
+        content: |
+          deb http://archive.ubuntu.com/ubuntu/ jammy main restricted universe multiverse
+          deb-src http://archive.ubuntu.com/ubuntu/ jammy main restricted universe multiverse
+          deb http://archive.ubuntu.com/ubuntu/ jammy-updates main restricted universe multiverse
+          deb-src http://archive.ubuntu.com/ubuntu/ jammy-updates main restricted universe multiverse
+          deb http://archive.ubuntu.com/ubuntu/ jammy-security main restricted universe multiverse
+          deb-src http://archive.ubuntu.com/ubuntu/ jammy-security main restricted universe multiverse
+          deb http://archive.ubuntu.com/ubuntu/ jammy-backports main restricted universe multiverse
+          deb-src http://archive.ubuntu.com/ubuntu/ jammy-backports main restricted universe multiverse
+          deb http://archive.canonical.com/ubuntu jammy partner
+          deb-src http://archive.canonical.com/ubuntu jammy partner
+        dest: /etc/apt/sources.list
+      when:
+        - ansible_distribution == 'Ubuntu'
+        - ansible_distribution_version == '22.04'
+      tags: [configure]
+
+    - name: Install Zabbix proxy
+      ansible.builtin.apt:
+        name: "{{ item }}"
+        state: present
+        update_cache: true
+      with_items:
+        - zabbix-proxy-sqlite3
+        - zabbix-sql-scripts
+        - python3-pip
+        - ca-certificates
+      when:
+        - ansible_distribution == 'Ubuntu'
+        - ansible_distribution_version == '22.04'
+      tags: [install]
+
+    - name: Install Zabbix API
+      ansible.builtin.command: "pip3 install zabbix_api"
+      ignore_errors: true
+
+    - name: Getting proxy version
+      ansible.builtin.command: "zabbix_proxy -V | grep 6"
+      register: results
+
+    - name: Showing proxy version
+      ansible.builtin.debug:
+        msg: "{{ results.stdout }}"
+
+    - name: Creating SQLite directory
+      ansible.builtin.file:
+        path: /var/lib/zabbix
+        state: directory
+        mode: u=rw,g=w,o=r
+      tags: [configure]
+
+    - name: Change directory permissions
+      ansible.builtin.file:
+        path: /var/lib/zabbix
+        owner: zabbix
+        group: zabbix
+        recurse: true
+        mode: "0770"
+      tags: [configure]
+
+    - name: Import proxy schema
+      ansible.builtin.shell:
+        cmd: |
+          cat /usr/share/zabbix-sql-scripts/sqlite3/proxy.sql | sqlite3 /var/lib/zabbix/zabbix_pxy.sqlite3
+      tags: [configure]
+
+    - name: Configure Zabbix proxy
+      ansible.builtin.debug:
+        msg: '[INFO] CONFIGURING ZABBIX PROXY...'
+
+    - name: Get system hostname
+      ansible.builtin.set_fact:
+        actual_hostname: "{{ ansible_hostname }}"
+
+    - name: Updating proxy configuration (ProxyMode)
+      ansible.builtin.lineinfile:
+        path: /etc/zabbix/zabbix_proxy.conf
+        regexp: '^# ProxyMode='
+        line: 'ProxyMode=0'
+      tags: [configure]
+
+    - name: Updating proxy configuration (Server)
+      ansible.builtin.lineinfile:
+        path: /etc/zabbix/zabbix_proxy.conf
+        regexp: '^Server='
+        line: 'Server={{ zabbix_server }}'
+      tags: [configure]
+
+    - name: Updating proxy configuration (Hostname)
+      ansible.builtin.lineinfile:
+        path: /etc/zabbix/zabbix_proxy.conf
+        regexp: '^Hostname='
+        line: "Hostname={{ actual_hostname }}"
+      tags: [configure]
+
+    - name: Updating proxy configuration (ListenPort)
+      ansible.builtin.lineinfile:
+        path: /etc/zabbix/zabbix_proxy.conf
+        regexp: '^# ListenPort='
+        line: 'ListenPort=10051'
+      tags: [configure]
+
+    - name: Updating proxy configuration (LogFile)
+      ansible.builtin.lineinfile:
+        path: /etc/zabbix/zabbix_proxy.conf
+        regexp: '^LogFile='
+        line: 'LogFile=/var/log/zabbix/zabbix_proxy.log'
+      tags: [configure]
+
+    - name: Updating proxy configuration (LogFileSize)
+      ansible.builtin.lineinfile:
+        path: /etc/zabbix/zabbix_proxy.conf
+        regexp: '^LogFileSize='
+        line: 'LogFileSize=0'
+      tags: [configure]
+
+    - name: Updating proxy configuration (PidFile)
+      ansible.builtin.lineinfile:
+        path: /etc/zabbix/zabbix_proxy.conf
+        regexp: '^PidFile='
+        line: 'PidFile=/run/zabbix/zabbix_proxy.pid'
+      tags: [configure]
+
+    - name: Updating proxy configuration (SocketDir)
+      ansible.builtin.lineinfile:
+        path: /etc/zabbix/zabbix_proxy.conf
+        regexp: '^SocketDir='
+        line: 'SocketDir=/run/zabbix'
+      tags: [configure]
+
+    - name: Updating proxy configuration (DBHost)
+      ansible.builtin.lineinfile:
+        path: /etc/zabbix/zabbix_proxy.conf
+        regexp: '^# DBHost='
+        line: 'DBHost=localhost'
+      tags: [configure]
+
+    - name: Updating proxy configuration (DBUser)
+      ansible.builtin.lineinfile:
+        path: /etc/zabbix/zabbix_proxy.conf
+        regexp: '^DBHost='
+        line: '# DBHost=zabbix'
+      tags: [configure]
+
+    - name: Updating proxy configuration (DBName)
+      ansible.builtin.lineinfile:
+        path: /etc/zabbix/zabbix_proxy.conf
+        regexp: '^DBName='
+        line: 'DBName=/var/lib/zabbix/zabbix_pxy.sqlite3'
+      tags: [configure]
+
+    - name: Updating proxy configuration (HeartbeatFrequency)
+      ansible.builtin.lineinfile:
+        path: /etc/zabbix/zabbix_proxy.conf
+        regexp: '^# HeartbeatFrequency='
+        line: 'HeartbeatFrequency=60'
+      tags: [configure]
+
+    - name: Updating proxy configuration (SNMPTrapperFile)
+      ansible.builtin.lineinfile:
+        path: /etc/zabbix/zabbix_proxy.conf
+        regexp: '^SNMPTrapperFile='
+        line: 'SNMPTrapperFile=/var/log/snmptrap/snmptrap.log'
+      tags: [configure]
+
+    - name: Updating proxy configuration (Timeout)
+      ansible.builtin.lineinfile:
+        path: /etc/zabbix/zabbix_proxy.conf
+        regexp: '^Timeout='
+        line: 'Timeout=30'
+      tags: [configure]
+
+    - name: Updating proxy configuration (FpingLocation)
+      ansible.builtin.lineinfile:
+        path: /etc/zabbix/zabbix_proxy.conf
+        regexp: '^FpingLocation='
+        line: 'FpingLocation=/usr/bin/fping'
+      tags: [configure]
+
+    - name: Updating proxy configuration (Fping6Location)
+      ansible.builtin.lineinfile:
+        path: /etc/zabbix/zabbix_proxy.conf
+        regexp: '^Fping6Location='
+        line: 'Fping6Location=/usr/bin/fping6'
+      tags: [configure]
+
+    - name: Updating proxy configuration (LogSlowQueries)
+      ansible.builtin.lineinfile:
+        path: /etc/zabbix/zabbix_proxy.conf
+        regexp: '^LogSlowQueries='
+        line: 'LogSlowQueries=3000'
+      tags: [configure]
+
+    - name: Updating proxy configuration (StatsAllowedIP)
+      ansible.builtin.lineinfile:
+        path: /etc/zabbix/zabbix_proxy.conf
+        regexp: '^StatsAllowedIP='
+        line: 'StatsAllowedIP=127.0.0.1'
+      tags: [configure]
+
+    - name: Changing database permissions
+      ansible.builtin.file:
+        path: /var/lib/zabbix/zabbix_pxy.sqlite3
+        owner: zabbix
+        group: zabbix
+        state: file
+
+    - name: Enabling proxy service
+      ansible.builtin.systemd:
+        name: zabbix-proxy
+        state: started
+        enabled: true
+      when:
+        - ansible_distribution == 'Ubuntu'
+        - ansible_distribution_version == '22.04'
+      tags: [configure]
+
+    - name: Display end result
+      ansible.builtin.debug:
+        msg: '[OK] ZABBIX PROXY INSTALLED.'
+
+    - name: End Ansible playbook
+      ansible.builtin.meta: end_play
+      notify: Restart proxy service
+
+  # Defining handler section.
+  handlers:
+    - name: Restart proxy service
+      ansible.builtin.systemd:
+        name: zabbix-proxy
+        state: restarted
