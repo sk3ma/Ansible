@@ -20,7 +20,7 @@ Vagrant.configure("2") do |config|
     c.vm.network "private_network", ip: "192.168.56.71"
 #    c.vm.network "forwarded_port", guest: 22, host: 2299, auto_correct: true
     c.vm.network "forwarded_port", guest: 80, host: 8080, auto_correct: true
-    # Preparing Ubuntu installation.
+    # Executing inline scripts.
     c.vm.provision "shell", inline: <<-SHELL
       echo -e "\e[32;1;3m[INFO] Installing Ansible\e[m"
       sudo apt update && sudo apt install screenfetch -y
@@ -51,8 +51,8 @@ become_ask_pass = False
 STOP
       echo -e "\e[36;1;3;5m[INFO] System online\e[m"
     SHELL
-      # Script to bootstrap.
-#      c.vm.provision "shell", path: "Ansible.sh", privileged: true
+    # Script to bootstrap.
+#    c.vm.provision "shell", path: "AWX.sh", privileged: true
     end
   # Customizing Ubuntu server.
     config.vm.define "node1" do |x|
