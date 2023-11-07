@@ -16,7 +16,7 @@
       ansible.builtin.debug:
         msg: '[INFO] INSTALLING DEPENDENCIES...'
 
-    - name: Installin dependencies
+    - name: Installing dependent packages
       ansible.builtin.apt:
         name: "{{ item }}"
         state: present
@@ -103,6 +103,10 @@
         read_priv: .*
         write_priv: .*
         state: present
+
+    - name: Display end status
+      ansible.builtin.debug:
+        msg: '[INFO] Finished, RabbitMQ installed.'
 
 # Defining handler section.
   handlers:
