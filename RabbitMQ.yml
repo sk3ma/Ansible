@@ -1,0 +1,115 @@
+---
+
+#################################################################################
+# This Ansible playbook will automate an RabbitMQ installation on Ubuntu 20.04. #
+#################################################################################
+
+# Defining target section.
+- name: Install RabbitMQ on Ubuntu
+  hosts: localhost
+  gather_facts: true
+  become: true
+
+  # Defining task section.
+  tasks:
+    - name: Installing dependencies
+      ansible.builtin.debug:
+        msg: '[INFO] INSTALLING DEPENDENCIES...'
+
+    - name: Installin dependencies
+      ansible.builtin.apt:
+        name: "{{ item }}"
+        state: present
+        update_cache: true
+      with_items:
+        - apt-transport-https
+        - vim
+        - curl
+        - whois
+        - telnet 
+        - smartmontools
+        - htop
+        - bash-completion 
+        - git
+        - strace
+        - screen
+        - ntpdate 
+        - software-properties-common
+        - bzip2
+        - net-tools
+        - sudo
+        - ntp
+
+    - name: Installing esl-erlang
+      ansible.builtin.debug:
+        msg: '[INFO] INSTALLING PREREQUISITES...'
+
+    - name: Adding esl-erlang package
+      ansible.builtin.get_url:
+        url: https://binaries2.erlang-solutions.com/ubuntu/pool/contrib/e/esl-erlang/esl-erlang_24.3.3-1~ubuntu~focal_amd64.deb
+        dest: /tmp/esl-erlang_24.3.3-1~ubuntu~focal_amd64.deb
+
+    - name: Installing esl-erlang package
+      ansible.builtin.command: echo "deb http://binaries2.erlang-solutions.com/ubuntu/ focal-esl-erlang-25 contrib" | tee /etc/apt/sources.list.d/erlang-solutions.list
+
+    - name: Adding trusted key
+      ansible.builtin.command: wget -O- https://dl.bintray.com/rabbitmq/Keys/rabbitmq-release-signing-key.asc | apt-key add -
+
+    - name: Adding RabbitMQ key
+      ansible.builtin.apt_key:
+        url: "https://www.rabbitmq.com/rabbitmq-release-signing-key.asc"
+        state: present
+
+    - name: Adding RabbitMQ repository
+      ansible.builtin.apt_repository:
+        repo: "deb https://dl.cloudsmith.io/public/rabbitmq/rabbitmq-erlang/deb/ubuntu focal main"
+        state: present
+
+    - name: Updating system cache
+      ansible.builtin.apt:
+        update_cache: true
+
+    - name: Installing RabbitMQ
+      ansible.builtin.debug:
+        msg: '[INFO] INSTALLING RABBITMQ...'
+
+    - name: Install RabbitMQ package
+      ansible.builtin.apt:
+        name: rabbitmq-server
+        state: present
+
+    - name: Install RabbitMQ plugins
+      rabbitmq_plugin:
+        names: rabbitmq_management
+        state: enabled
+      notify:
+        - restart rabbitmq
+
+    - name: Check RabbitMQ version
+      ansible.builtin.command: "rabbitmqctl version"
+      register: results
+
+    - name: Display RabbitMQ version
+      ansible.builtin.debug:
+        msg: "{{ results.stdout }}"
+
+    - name: Add RabbitMQ users
+      rabbitmq_user:
+        user: admin
+        password: 1q2w3e4r5t
+        vhost: /
+        tags: sysadmin
+        configure_priv: .*
+        read_priv: .*
+        write_priv: .*
+        state: present
+
+# Defining handler section.
+  handlers:
+      - name: restart rabbitmq
+        ansible.builtin.systemd:
+          name: rabbitmq-server
+          state: restarted
+
+      - name: End Ansible playbook
+        ansible.builtin.meta: end_play
