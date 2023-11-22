@@ -158,9 +158,9 @@
 
     - name: Updating agent configuration (Include)
       ansible.builtin.lineinfile:
-        path: "/etc/zabbix/zabbix_agent2.conf"
+        path: "/etc/zabbix/zabbix_agentd.conf"
         insertafter: "^# Include="
-        line: "Include=/etc/zabbix/zabbix_agent2.d/*.conf"
+        line: "Include=/etc/zabbix/zabbix_agentd.d/*.conf"
 
     - name: Adding Netdata integration
       ansible.builtin.copy:
