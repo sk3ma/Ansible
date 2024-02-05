@@ -9,7 +9,7 @@ Vagrant.configure("2") do |config|
     v.gui    = false
 #    v.name   = "Ubuntu-20.04"
   end
-  # Customizing Ubuntu server.
+  # Customizing Ansible server.
     config.vm.define "controller" do |c|
     c.vm.box              = "bento/ubuntu-20.04"
     c.vm.box_check_update = false
@@ -57,7 +57,7 @@ STOP
     # Script to bootstrap.
 #    c.vm.provision "shell", path: "AWX.sh", privileged: true
     end
-  # Customizing Ubuntu server.
+  # Customizing Ubuntu client.
     config.vm.define "node1" do |x|
     x.vm.box              = "bento/ubuntu-20.04"
     x.vm.box_check_update = false
@@ -83,7 +83,7 @@ STOP
       echo -e "\e[36;1;3;5m[INFO] System online\e[m"
     SHELL
     end
-  # Customizing Ubuntu server.
+  # Customizing Ubuntu client.
     config.vm.define "node2" do |y|
     y.vm.box              = "bento/ubuntu-20.04"
     y.vm.box_check_update = false
