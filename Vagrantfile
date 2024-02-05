@@ -27,6 +27,7 @@ Vagrant.configure("2") do |config|
       echo '/usr/bin/screenfetch' >> /home/vagrant/.bashrc
       sudo chmod a-x /etc/update-motd.d/00-header
       sudo chmod a-x /etc/update-motd.d/99-bento
+      echo "export PS1='\\[\e]0;\\u@\\h: \\w\\a\\]\${debian_chroot:+(\$debian_chroot)}\\[\\033[01;36m\\]\\u\\[\\033[00m\\]\\[\\033[01;37m\\]@\\[\\033[00m\\]\\[\\033[01;35m\\]\\h\\[\\033[00m\\]\\[\\033[01;37m\\]:\\[\\033[00;34m\\]\\w\\[\\033[00m\\]\\$ '" >> /home/vagrant/.bashrc
       sudo apt-add-repository ppa:ansible/ansible -y
       sudo apt install ansible sshpass yamllint ansible-lint software-properties-common tree -y
       ansible-galaxy collection install community.zabbix
@@ -72,6 +73,7 @@ STOP
       echo '/usr/bin/screenfetch' >> /home/vagrant/.bashrc
       sudo chmod a-x /etc/update-motd.d/00-header
       sudo chmod a-x /etc/update-motd.d/99-bento
+      echo "export PS1='\\[\e]0;\\u@\\h: \\w\\a\\]\${debian_chroot:+(\$debian_chroot)}\\[\\033[01;32m\\]\\u\\[\\033[00m\\]\\[\\033[01;31m\\]@\\[\\033[00m\\]\\[\\033[01;33m\\]\\h\\[\\033[00m\\]:\\[\\033[01;34m\\]\\w\\[\\033[00m\\]\\$ '" >> /home/vagrant/.bashrc
       cat << STOP > /etc/hosts
 127.0.0.1       localhost
 127.0.1.1       node1
@@ -97,6 +99,7 @@ STOP
       echo '/usr/bin/screenfetch' >> /home/vagrant/.bashrc
       sudo chmod a-x /etc/update-motd.d/00-header
       sudo chmod a-x /etc/update-motd.d/99-bento
+      echo "export PS1='\\[\e]0;\\u@\\h: \\w\\a\\]\${debian_chroot:+(\$debian_chroot)}\\[\\033[01;32m\\]\\u\\[\\033[00m\\]\\[\\033[01;31m\\]@\\[\\033[00m\\]\\[\\033[01;33m\\]\\h\\[\\033[00m\\]:\\[\\033[01;34m\\]\\w\\[\\033[00m\\]\\$ '" >> /home/vagrant/.bashrc
       cat << STOP > /etc/hosts
 127.0.0.1       localhost
 127.0.1.1       node2
