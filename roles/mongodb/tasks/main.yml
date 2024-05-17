@@ -1,9 +1,0 @@
----
-# Uncomment to enable a task.
-- name: Tasks for rw_mongodb role
-  ansible.builtin.include_tasks: "{{ item }}"
-  loop:
-    - install.yml
-    - configure.yml
-#    - uninstall.yml
-...

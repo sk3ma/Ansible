@@ -1,6 +1,0 @@
----
-# Handler section.
-- name: Restart service
-  ansible.builtin.systemd:
-    name: mongod
-    state: restarted
